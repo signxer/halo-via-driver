@@ -72,6 +72,7 @@ const MacroList = styled.div`
   flex-direction: column;
   gap: .5rem;
   overflow-y: auto;
+  overflow-x: hidden;
   min-height: 0;
   background: var(--surface-card);
   border-radius: 1rem;
@@ -82,7 +83,7 @@ const MacroItem = styled.div<{$active: boolean}>`
   display: flex;
   align-items: center;
   flex: 0 0 1.5rem;
-  width: calc(100% + .5rem);
+  width: 100%;
   box-sizing: border-box;
   border: 0;
   border-radius: .5rem;
@@ -138,21 +139,6 @@ const MacroTitle = styled.span<{$active: boolean}>`
   font-weight: 700;
 `;
 
-const MacroMore = styled.span`
-  flex: 0 0 1.25rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-left: auto;
-  border-radius: .375rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: inherit;
-  font-size: .75rem;
-  line-height: 1;
-`;
-
 const MacroPreview = styled.div`
   display: none;
   font-size: 0.625rem;
@@ -193,7 +179,7 @@ const EditorItem = styled.div`
 const EditorBindings = styled(EditorItem)`
   flex: 1 1 0;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden auto;
 `;
 
 const MacroEditorTitle = styled.div`
@@ -257,6 +243,7 @@ const RecorderAction = styled.button<{$active?: boolean}>`
 const RecorderRows = styled.div`
   max-height: 8.5rem;
   overflow-y: auto;
+  overflow-x: hidden;
   font-size: .6875rem;
   color: var(--text-black-l-title);
 `;
@@ -271,6 +258,13 @@ const RecorderRow = styled.div`
   color: var(--text-black-l-title);
   font-weight: 500;
   text-align: center;
+  min-width: 0;
+  & > * {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 `;
 
 const TextArea = styled.textarea`
@@ -316,6 +310,7 @@ const Recorder = styled.div`
   background: var(--surface-card);
   color: var(--text-black-l-title);
   font-size: .6875rem;
+  overflow: hidden;
 `;
 
 const RecorderTitle = styled.div`
@@ -338,6 +333,13 @@ const RecorderHeaders = styled.div`
   font-size: .5625rem;
   text-align: center;
   padding: .75rem 0 .5rem;
+  min-width: 0;
+  & > * {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 `;
 
 // 序列 → 可编辑文本(示例:Tap A, Delay 50, Char "hello")
@@ -507,7 +509,6 @@ export const MacroPage: React.FC = () => {
                 <MacroHeader>
                   <MacroName $active={i === active}>M{i + 1}</MacroName>
                   <MacroTitle $active={i === active}>MACRO {i + 1}</MacroTitle>
-                  {i === active && <MacroMore>•••</MacroMore>}
                 </MacroHeader>
                 <MacroPreview>
                   {sequenceToText(seq) || '空宏'}
