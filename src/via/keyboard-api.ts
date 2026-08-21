@@ -411,7 +411,10 @@ export class KeyboardAPI {
       commandBytes,
       'CUSTOM_MENU_GET_VALUE',
     );
-    return res.slice(0 + commandBytes.length);
+    // HID response: [command, channel, menuCommand, ...values].
+    // commandBytes only contains [channel, menuCommand], so skip the
+    // protocol command byte as well before exposing the actual values.
+    return res.slice(1 + commandBytes.length);
   }
 
   async setCustomMenuValue(...args: number[]): Promise<void> {
