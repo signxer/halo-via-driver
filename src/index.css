@@ -1,0 +1,158 @@
+@import './theme/nuphy.css';
+/* NuPhy 官方 Alibaba PuHuiTi 3.0 子集字体。 */
+@import url('/font/400-Regular/result.css');
+@import url('/font/500-Medium/result.css');
+@import url('/font/700-Bold/result.css');
+@import url('/font/900-Heavy/result.css');
+@import url('/font/1000-Black/result.css');
+
+/* NuPhy 原版使用 Alibaba PuHuiTi。 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  font-size: 12.6074px;
+}
+
+body {
+  /* 原版驱动使用固定根字号，所有 rem 布局以此为基准。 */
+  font-family: var(--font-family);
+  font-size: 12.6074px;
+  color: var(--text-primary);
+  background: var(--background-canvas);
+  background-image: var(--app-background-image);
+  background-position: center bottom;
+  background-size: cover;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+html[data-theme="light"] body {
+  background-color: var(--background-canvas-overlay);
+}
+
+/* 全局滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+input,
+select {
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+/* NuPhy 风格通用卡片 */
+.card {
+  background: var(--panel-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+}
+
+/* 主按钮 */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--brand);
+  color: #002b22;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: var(--brand-dark);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 次级按钮 */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--panel-dark-2);
+  color: #fff;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+  background: #3a3a3d;
+}
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 危险按钮 */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+.btn-danger:hover {
+  filter: brightness(1.1);
+}
+
+/* 幽灵按钮 */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
