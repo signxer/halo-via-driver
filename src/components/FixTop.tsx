@@ -145,8 +145,8 @@ const IconBtn = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.375rem;
+  height: 1.375rem;
   line-height: 0;
   border-radius: 0.625rem;
   color: var(--text-black-l-title);
@@ -157,8 +157,8 @@ const IconBtn = styled.button`
   }
   svg {
     display: block;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.375rem;
+    height: 1.375rem;
     fill: currentColor;
     stroke: none;
     overflow: visible;
@@ -171,6 +171,10 @@ const IconBtn = styled.button`
     stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+  svg.moon-icon {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 `;
 
@@ -396,7 +400,7 @@ const SunIcon: React.FC = () => (
 );
 
 const MoonIcon: React.FC = () => (
-  <svg className="theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+  <svg className="theme-icon moon-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path d="M19.25 13.22a7.5 7.5 0 1 1-8.47-8.47 6.25 6.25 0 0 0 8.47 8.47Z" />
   </svg>
 );
