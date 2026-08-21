@@ -163,9 +163,6 @@ const IconBtn = styled.button`
     stroke: none;
     overflow: visible;
   }
-  svg:not(.moon-icon) {
-    transform: translateY(1px);
-  }
   .top-icon-MoreBox,
   .top-icon-SettingGear { fill: none; }
   svg.theme-icon {
@@ -392,7 +389,7 @@ const ModalBtn = styled.button`
 
 const SvgIcon: React.FC<{id: string}> = ({id}) => (
   <svg className={`top-icon top-icon-${id}`} viewBox="0 0 24 24" aria-hidden="true">
-    <use href={`${navSprite}#${id}`} />
+    <use href={`${navSprite}#${id}`} transform="translate(2 2)" />
   </svg>
 );
 
