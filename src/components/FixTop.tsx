@@ -86,7 +86,7 @@ const RightRightBox = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 0.375rem;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 0.75rem;
   padding: 0.125rem;
   box-shadow: 0 1px 6px var(--black-8);
@@ -126,7 +126,7 @@ const LeftName = styled.p`
   display: block;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--black-86);
+  color: var(--text-primary);
   margin: 0;
   max-width: 12rem;
   overflow: hidden;
@@ -162,7 +162,7 @@ const MoreMenu = styled.div`
   position: absolute;
   top: calc(100% + 0.375rem);
   right: 0;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 0.75rem;
   padding: 0.25rem;
   box-shadow: 0 4px 20px var(--black-16);
@@ -254,7 +254,7 @@ const ProfileCard = styled.section<{$recommended?: boolean}>`
   gap: 0.5rem;
   padding: 0.75rem 0.5rem;
   box-sizing: border-box;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem;
 `;
 
@@ -331,7 +331,7 @@ const IOModalOverlay = styled.div`
 `;
 
 const IOModalBox = styled.div`
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem;
   padding: 1.5rem;
   width: min(26rem, calc(100vw - 3rem));

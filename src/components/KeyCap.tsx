@@ -88,7 +88,7 @@ const LightingFace = styled.div`
   inset: .16rem;
   border-radius: .38rem;
   /* 原版 bottomBoxB 是纯白，发光只从键帽边缘透出。 */
-  background: #fff;
+  background: var(--keyboard-background);
   box-shadow: inset 0 0 .08rem rgba(255,255,255,.9);
   pointer-events: none;
 `;

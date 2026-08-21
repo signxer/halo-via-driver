@@ -34,7 +34,7 @@ const Title = styled.div`
   justify-content: space-between;
   align-self: stretch;
   padding: 0.5rem 1rem 1rem;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem 1rem 0 0;
   h3 {
     font-size: 0.875rem; /* 原版 7.78px fw900 */
@@ -72,7 +72,7 @@ const GroupCard = styled.div`
   gap: 0;
   align-self: stretch;
   border-radius: 0.75rem;
-  background: var(--white-100);
+  background: var(--surface-card);
   margin-bottom: 0.5rem;
   box-shadow: 0 0.125rem 0.5rem var(--black-4);
 `;
@@ -99,7 +99,7 @@ const ItemIcon = styled.div`
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 0.625rem;
-  background: var(--white-100);
+  background: var(--surface-card);
   color: var(--text-black-l-title);
   flex-shrink: 0;
   svg {
@@ -141,7 +141,7 @@ const ReferenceSettings = styled.div`
 `;
 
 const ReferenceGroup = styled.div`
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem;
   padding: .25rem .5rem;
   box-shadow: 0 .125rem .5rem var(--black-4);
@@ -185,7 +185,7 @@ const ReferenceFooter = styled.div`
 `;
 
 const FeedbackBox = styled.div`
-  min-height:12.25rem; padding:.75rem; border-radius:1rem; background:var(--white-100);
+  min-height:12.25rem; padding:.75rem; border-radius:1rem; background:var(--surface-card);
   box-shadow:0 .125rem .5rem var(--black-4);
   display:grid; grid-template-columns:repeat(4,1fr); gap:.25rem;
   a, span { display:flex; align-items:center; justify-content:center; min-height:2.25rem; border-radius:.5rem; background:var(--black-2); color:var(--text-black-l-title); font-size:.6875rem; font-weight:700; text-decoration:none; }
@@ -194,7 +194,7 @@ const FeedbackBox = styled.div`
 `;
 
 const DownloadBox = styled.div`
-  min-height:12.25rem; padding:.5rem; border-radius:1rem; background:var(--white-100);
+  min-height:12.25rem; padding:.5rem; border-radius:1rem; background:var(--surface-card);
   box-shadow:0 .125rem .5rem var(--black-4); display:flex; flex-direction:column; gap:.5rem;
 `;
 
@@ -267,7 +267,7 @@ const Overlay = styled.div`
 `;
 
 const ModalBox = styled.div`
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem;
   padding: 1.5rem;
   width: min(26rem, calc(100vw - 3rem));
@@ -306,7 +306,7 @@ const DeviceImg = styled.img`
   width: 4.5rem;
   height: auto;
   border-radius: 0.375rem;
-  background: var(--white-100);
+  background: var(--surface-card);
 `;
 
 const DeviceInfo = styled.div`

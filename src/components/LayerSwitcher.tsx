@@ -37,9 +37,9 @@ const Btn = styled.button<{$active: boolean}>`
   line-height: 1;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: ${(p) => (p.$active ? '#fff' : 'var(--black-86)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--button-inactive-text)')};
   background: ${(p) =>
-    p.$active ? 'var(--black-86)' : 'var(--white-100)'};
+    p.$active ? 'var(--button-active-background)' : 'var(--button-inactive-background)'};
   &:hover {
     opacity: 0.85;
   }

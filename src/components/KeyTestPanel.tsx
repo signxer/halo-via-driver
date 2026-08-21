@@ -101,7 +101,7 @@ const ControlBox = styled.div`
   gap: 0.5rem;
   padding: 0.5rem;
   box-sizing: border-box;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem;
 `;
 
@@ -193,7 +193,7 @@ const History = styled.div`
   gap: 0.25rem;
   padding: 0.5rem;
   box-sizing: border-box;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 0.75rem;
 `;
 

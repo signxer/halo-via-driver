@@ -20,7 +20,7 @@ const AppContainerBac = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: rgb(255, 255, 255);
+  background: var(--surface-page);
   padding: 0.5rem;
   background-image: var(--app-background-image);
   background-position: center bottom;

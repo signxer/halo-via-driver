@@ -39,7 +39,7 @@ const Card = styled.div`
   left: 1.9rem;
   right: 1.9rem;
   bottom: 0.5rem;
-  background: var(--background-canvas-overlay);
+  background: var(--surface-page);
   border-radius: 1rem;
   padding: 1rem;
   box-shadow: 0 2px 8px var(--black-4);
@@ -69,7 +69,7 @@ const ZoneTab = styled.button<{$active: boolean}>`
   min-height: 9.8125rem;
   padding: .5rem;
   border-radius: .75rem;
-  background: ${(p) => (p.$active ? 'rgba(29,29,31,.86)' : 'transparent')};
+  background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
   border: 0;
   transition: all 0.15s ease;
   cursor: pointer;
@@ -102,7 +102,7 @@ const ZoneLabel = styled.span<{$active: boolean}>`
   font-weight: 700;
   line-height: normal;
   white-space: nowrap;
-  color: ${(p) => (p.$active ? '#fff' : 'rgba(29,29,31,.86)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
 `;
 
 const ZoneDescription = styled.span<{$active: boolean}>`
@@ -110,7 +110,7 @@ const ZoneDescription = styled.span<{$active: boolean}>`
   font-weight: 500;
   line-height: normal;
   white-space: nowrap;
-  color: ${(p) => (p.$active ? 'rgba(255,255,255,.32)' : 'rgba(29,29,31,.32)')};
+  color: ${(p) => (p.$active ? 'var(--text-white-s-content)' : 'var(--text-secondary)')};
 `;
 
 const ZoneSwitch = styled.span<{$on: boolean}>`
@@ -121,7 +121,7 @@ const ZoneSwitch = styled.span<{$on: boolean}>`
   padding: .125rem;
   box-sizing: border-box;
   border-radius: 5rem;
-  background: ${(p) => (p.$on ? '#34c759' : 'rgba(0,0,0,.25)')};
+  background: ${(p) => (p.$on ? 'var(--other-switch-on)' : 'var(--other-switch-off)')};
   transition: background .15s ease;
   &::after {
     content: '';
@@ -129,7 +129,7 @@ const ZoneSwitch = styled.span<{$on: boolean}>`
     width: 1.625rem;
     height: 1.625rem;
     border-radius: 50%;
-    background: #fff;
+    background: var(--other-switch-circle);
     transform: ${(p) => (p.$on ? 'translateX(1.375rem)' : 'translateX(0)')};
     transition: transform .15s ease;
   }
@@ -149,7 +149,7 @@ const EffectGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: .25rem;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: .75rem;
   padding: .5rem;
   align-content: start;
@@ -167,11 +167,11 @@ const EffectItem = styled.button<{$active: boolean}>`
   padding: .5rem .125rem;
   height: 3.5rem;
   border-radius: var(--border-radius-s);
-  background: ${(p) => (p.$active ? '#333335' : 'transparent')};
-  border: 1px solid ${(p) => (p.$active ? '#333335' : 'transparent')};
+  background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
+  border: 1px solid ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
   transition: all 0.1s ease;
   cursor: pointer;
-  color: ${(p) => (p.$active ? '#fff' : 'var(--text-black-l-title)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
   &:hover {
     border-color: var(--theme-color);
   }
@@ -181,7 +181,7 @@ const EffectDot = styled.span<{$active: boolean}>`
   width: 1.25rem;
   height: 1.25rem;
   display: block;
-  color: ${(p) => (p.$active ? '#fff' : 'var(--text-black-l-title)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
   opacity: ${(p) => (p.$active ? 1 : .72)};
   svg { width: 100%; height: 100%; fill: currentColor; }
 `;
@@ -189,7 +189,7 @@ const EffectDot = styled.span<{$active: boolean}>`
 const EffectName = styled.span<{$active: boolean}>`
   font-size: 0.6875rem;
   font-weight: 500;
-  color: ${(p) => (p.$active ? '#fff' : 'var(--text-black-l-title)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
   text-align: center;
   line-height: 1.2;
   white-space: nowrap;
@@ -204,7 +204,7 @@ const GlobalLightToggle = styled.span<{$on: boolean}>`
   box-sizing: border-box;
   border: 0;
   border-radius: 5rem;
-  background: ${(p) => (p.$on ? '#34c759' : '#787880')};
+  background: ${(p) => (p.$on ? 'var(--other-switch-on)' : 'var(--other-switch-off)')};
   cursor: pointer;
   &::after {
     content: '';
@@ -212,7 +212,7 @@ const GlobalLightToggle = styled.span<{$on: boolean}>`
     width: 1.625rem;
     height: 1.625rem;
     border-radius: 50%;
-    background: #fff;
+    background: var(--other-switch-circle);
     transform: ${(p) => (p.$on ? 'translateX(1.375rem)' : 'translateX(0)')};
   }
 `;
@@ -228,7 +228,7 @@ const SliderCard = styled.div<{$row: number}>`
   box-sizing: border-box;
   padding: .5rem;
   border-radius: .75rem;
-  background: rgba(29,29,31,.02);
+  background: var(--surface-quiet);
 `;
 
 const SettingHeader = styled.div`
@@ -236,7 +236,7 @@ const SettingHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 1rem;
-  color: rgba(29,29,31,.86);
+  color: var(--text-primary);
 `;
 
 const SettingTitle = styled.span`
@@ -276,7 +276,7 @@ const SliderTick = styled.span<{$label?: string}>`
     width: .09375rem;
     height: 100%;
     border-radius: .0625rem;
-    background: rgba(29,29,31,.16);
+    background: var(--black-16);
   }
   &::after {
     content: '${(p) => p.$label ?? ''}';
@@ -284,7 +284,7 @@ const SliderTick = styled.span<{$label?: string}>`
     top: -.9375rem;
     left: 50%;
     transform: translateX(-50%);
-    color: rgba(29,29,31,.32);
+    color: var(--text-secondary);
     font-size: .75rem;
     font-weight: 700;
     white-space: nowrap;
@@ -297,9 +297,9 @@ const SliderOuter = styled.div`
   height: 2.25rem;
   margin: .25rem 0;
   box-sizing: border-box;
-  border: .125rem solid #1d1d1f;
+  border: .125rem solid var(--slider-border);
   border-radius: .5rem;
-  background: #fff;
+  background: var(--slider-background);
 `;
 
 const SliderTrack = styled.div`
@@ -307,7 +307,7 @@ const SliderTrack = styled.div`
   inset: 0 .375rem;
   height: 2rem;
   border-radius: .375rem;
-  background: rgba(29,29,31,.06);
+  background: var(--slider-track);
 `;
 
 const SliderProgress = styled.div<{$ratio: number}>`
@@ -317,7 +317,7 @@ const SliderProgress = styled.div<{$ratio: number}>`
   width: ${(p) => `${p.$ratio * 100}%`};
   height: 100%;
   border-radius: .375rem;
-  background: #fff;
+  background: var(--slider-progress);
 `;
 
 const SliderThumb = styled.div<{$ratio: number}>`
@@ -329,9 +329,9 @@ const SliderThumb = styled.div<{$ratio: number}>`
   height: 2.1875rem;
   box-sizing: border-box;
   transform: translate(-50%, -50%);
-  border: .125rem solid #fff;
+  border: .125rem solid var(--slider-thumb-border);
   border-radius: .375rem;
-  background: rgba(29,29,31,.16);
+  background: var(--slider-thumb-background);
   box-shadow: 0 .125rem .25rem rgba(0,0,0,.1);
   pointer-events: none;
 `;
@@ -357,7 +357,7 @@ const DirectionCard = styled.div<{$row: number}>`
   box-sizing: border-box;
   padding: .5rem;
   border-radius: .75rem;
-  background: rgba(29,29,31,.02);
+  background: var(--surface-quiet);
 `;
 
 const DirectionOptions = styled.div`
@@ -377,8 +377,8 @@ const DirectionOption = styled.button<{$active: boolean}>`
   padding: 0;
   border: 0;
   border-radius: .375rem;
-  color: ${(p) => (p.$active ? '#fff' : 'rgba(29,29,31,.86)')};
-  background: ${(p) => (p.$active ? 'rgba(29,29,31,.86)' : 'transparent')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
+  background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1;
@@ -396,7 +396,7 @@ const ColorSection = styled.div`
   grid-column: 4;
   grid-row: 1 / span 5;
   align-content: start;
-  background: rgba(29,29,31,.02);
+  background: var(--surface-quiet);
   align-items: start;
   > :nth-child(1) { grid-column: 1 / -1; grid-row: 1; }
   > :nth-child(2) { grid-column: 1; grid-row: 2; }
@@ -455,7 +455,7 @@ const HexInput = styled.input`
   font-size: 0.75rem;
   font-family: 'SF Mono', Menlo, monospace;
   color: var(--text-black-l-title);
-  background: var(--white-100);
+  background: var(--surface-card);
   outline: none;
   &:focus {
     border-color: var(--theme-color);

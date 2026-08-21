@@ -123,6 +123,28 @@ html {
   /* === 键盘字母区文字 === */
   --keyboard-text: #d9d9dc;
   --keyboard-text-secondary: #8e8e93;
+
+  /* 页面组件表面层：组件不得直接写死白色，否则暗色主题会出现
+     白色面板配白色文字。 */
+  --surface-page: var(--background-canvas-overlay);
+  --surface-card: var(--white-100);
+  --surface-quiet: var(--black-2);
+  --surface-input: var(--black-4);
+  --surface-hover: var(--black-6);
+  --text-primary: var(--text-black-l-title);
+  --text-secondary: var(--text-black-s-content);
+  --text-tertiary: var(--black-56);
+  --border-subtle: var(--black-8);
+  --button-active-background: var(--black-86);
+  --button-active-text: var(--white-100);
+  --button-inactive-background: var(--white-100);
+  --button-inactive-text: var(--black-86);
+  --slider-border: var(--black-100);
+  --slider-background: var(--white-100);
+  --slider-track: var(--black-6);
+  --slider-progress: var(--white-100);
+  --slider-thumb-border: var(--white-100);
+  --slider-thumb-background: var(--black-16);
 }
 
 html[data-theme="dark"] {
@@ -228,4 +250,24 @@ html[data-theme="dark"] {
   --border-radius-m: 0.75rem;
   --border-radius-s: 0.5rem;
   --border-radius-xs: 0.375rem;
+
+  --surface-page: var(--background-canvas-overlay);
+  --surface-card: var(--dark-mode-overlay-black-64);
+  --surface-quiet: var(--white-6);
+  --surface-input: var(--white-6);
+  --surface-hover: var(--white-8);
+  --text-primary: var(--text-black-l-title);
+  --text-secondary: var(--text-black-s-content);
+  --text-tertiary: var(--white-32);
+  --border-subtle: var(--white-8);
+  --button-active-background: var(--dark-mode-button);
+  --button-active-text: var(--white-100);
+  --button-inactive-background: var(--white-6);
+  --button-inactive-text: var(--white-86);
+  --slider-border: var(--white-16);
+  --slider-background: var(--dark-mode-button);
+  --slider-track: var(--white-6);
+  --slider-progress: var(--white-16);
+  --slider-thumb-border: var(--white-86);
+  --slider-thumb-background: var(--white-32);
 }

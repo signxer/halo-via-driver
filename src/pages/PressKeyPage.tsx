@@ -88,7 +88,7 @@ const ResetBtn = styled.button`
 const TabBottomContent = styled.div<{$firstTab: boolean}>`
   display: flex;
   flex-direction: row;
-  background: rgb(249, 249, 249);
+  background: var(--surface-page);
   border-radius: ${(p) => (p.$firstTab ? '0 1.5rem 1.5rem 1.5rem' : '1.5rem')};
   padding: 0.5rem;
   gap: 0;
@@ -98,7 +98,7 @@ const TabBottomContent = styled.div<{$firstTab: boolean}>`
 `;
 
 const EmptyHint = styled.div`
-  color: rgba(29, 29, 31, 0.32);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   padding: 2.5rem;
   text-align: center;

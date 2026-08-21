@@ -31,7 +31,7 @@ const Card = styled.div`
   left: 1.9rem;
   right: 1.9rem;
   bottom: 0.5rem;
-  background: var(--background-canvas-overlay);
+  background: var(--surface-page);
   border-radius: 1.5rem;
   box-shadow: 0 0.125rem 0.5rem var(--black-4);
   padding: .5rem 1rem;
@@ -63,7 +63,7 @@ const MacroList = styled.div`
   gap: 0.125rem;
   overflow-y: auto;
   min-height: 0;
-  background: var(--white-100);
+  background: var(--surface-card);
   border-radius: 1rem;
   padding: 0;
 `;
@@ -75,8 +75,8 @@ const MacroItem = styled.div<{$active: boolean}>`
   padding: 0.3rem 0.5rem;
   cursor: pointer;
   transition: all 0.15s ease;
-  background: ${(p) => (p.$active ? 'var(--black-86)' : 'transparent')};
-  color: ${(p) => (p.$active ? '#fff' : 'var(--text-black-l-title)')};
+  background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
 
   &:hover {
     border-color: var(--brand);
@@ -98,8 +98,8 @@ const MacroName = styled.span<{$active: boolean}>`
   height: 1rem;
   margin-right: .375rem;
   border-radius: .5rem;
-  background: ${(p) => (p.$active ? '#fff' : 'var(--black-86)')};
-  color: ${(p) => (p.$active ? 'var(--black-86)' : '#fff')};
+  background: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--button-active-background)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-background)' : 'var(--button-active-text)')};
   font-weight: 700;
   font-size: 0.6875rem;
 `;
@@ -131,7 +131,7 @@ const MacroPreview = styled.div`
 const Editor = styled.div`
   margin: 0;
   padding: .75rem .5rem .5rem;
-  background: rgba(29,29,31,.02);
+  background: var(--surface-quiet);
   border-radius: .75rem;
 `;
 
@@ -162,7 +162,7 @@ const IntervalButtons = styled.div`
     background: var(--black-4);
     color: var(--text-black-l-title);
   }
-  button:first-child { background: var(--black-86); color: #fff; }
+  button:first-child { background: var(--button-active-background); color: var(--button-active-text); }
 `;
 
 const BindingTitle = styled.div`
@@ -186,7 +186,7 @@ const BindingSlot = styled.div<{$plus?: boolean}>`
   justify-content: center;
   color: var(--text-black-s-content);
   font-size: .5625rem;
-  background: ${(p) => (p.$plus ? 'var(--white-100)' : 'var(--black-2)')};
+  background: ${(p) => (p.$plus ? 'var(--surface-card)' : 'var(--surface-quiet)')};
   flex-direction: column;
   &::after { content: ${(p) => (p.$plus ? "'+'" : "'--'")}; margin-top: .25rem; color: var(--text-black-s-content); }
 `;
@@ -235,7 +235,7 @@ const Recorder = styled.div`
   min-width: 0;
   padding: .75rem .5rem .5rem;
   border-radius: .75rem;
-  background: rgba(29,29,31,.02);
+  background: var(--surface-quiet);
   color: var(--text-black-s-content);
   font-size: .6875rem;
 `;

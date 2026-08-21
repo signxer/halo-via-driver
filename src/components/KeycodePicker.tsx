@@ -102,7 +102,7 @@ const OptionListCart = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  background: rgb(255, 255, 255);
+  background: var(--surface-card);
   border-radius: 1rem;
   padding: 0.5rem;
   flex-shrink: 0;
@@ -180,7 +180,7 @@ const KeyListBox = styled.div`
   margin-left: 0.5rem;
   border-radius: 1rem;
   padding: 0.5rem;
-  background: rgb(255, 255, 255);
+  background: var(--surface-card);
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
@@ -219,7 +219,7 @@ const KeyTableCard = styled.div`
   min-height: 0;
   padding: 0.5rem;
   border-radius: 0.75rem;
-  background: rgba(29, 29, 31, 0.02);
+  background: var(--surface-quiet);
   overflow: auto;
 `;
 
@@ -228,7 +228,7 @@ const SearchBox = styled.div`
   height: 1.5rem;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(29, 29, 31, 0.04);
+  background: var(--surface-input);
   border-radius: 0.5rem;
   padding: 0.125rem 0.25rem;
   flex-shrink: 0;

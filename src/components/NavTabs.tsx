@@ -84,7 +84,7 @@ const TabItemLi = styled.li<{$active: boolean}>`
   margin: 0;
   height: 1.875rem;
   color: ${(p) =>
-    p.$active ? 'var(--black-100)' : 'var(--text-black-s-content)'};
+    p.$active ? 'var(--text-primary)' : 'var(--text-secondary)'};
   background: transparent;
   height: 100%;
 
