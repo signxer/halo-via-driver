@@ -163,6 +163,9 @@ const IconBtn = styled.button`
     stroke: none;
     overflow: visible;
   }
+  svg:not(.moon-icon) {
+    transform: translateY(1px);
+  }
   .top-icon-MoreBox,
   .top-icon-SettingGear { fill: none; }
   svg.theme-icon {
