@@ -6,49 +6,51 @@ import {useThemeStore} from '../store/theme';
 import {messages} from '../i18n';
 
 const Page = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 0 0 2rem;
+  position: fixed;
+  z-index: 50;
+  inset: 3rem 0 0;
+  overflow: auto;
+  background-color: var(--background-canvas);
+  background-image: var(--app-background-image);
+  background-position: center bottom;
+  background-size: cover;
 `;
 
 const Panel = styled.div`
-  width: min(100%, 70.5rem);
+  width: 70.5rem;
+  max-width: calc(100% - 3rem);
+  min-height: 100%;
   margin: 0 auto;
-  padding: .5rem;
-  box-sizing: border-box;
-  border-radius: 1.25rem;
-  background: var(--background-canvas);
 `;
 
 const Title = styled.div`
   display: flex;
+  height: 2.25rem;
   align-items: center;
   justify-content: space-between;
-  padding: .25rem .5rem .75rem;
-  background: transparent;
+  padding: .5rem 1rem;
+  box-sizing: border-box;
+  background: var(--background-canvas-overlay);
+  border-radius: 1.5rem 1.5rem 0 0;
   h3 {
     margin: 0;
     color: var(--text-black-l-title);
-    font-size: .875rem;
-    font-weight: 900;
+    font-size: .75rem;
+    font-weight: 700;
   }
 `;
 
 const CloseBtn = styled.button`
   display: flex;
+  width: 1.25rem;
+  height: 1.25rem;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
   padding: 0;
   border: 0;
-  border-radius: .875rem;
   background: transparent;
   color: var(--text-black-l-title);
   cursor: pointer;
-  &:hover { background: var(--black-4); }
   svg { width: 1.25rem; height: 1.25rem; fill: currentColor; }
 `;
 
@@ -56,55 +58,78 @@ const SettingsGroups = styled.div`
   display: flex;
   flex-direction: column;
   gap: .5rem;
-  padding: 0 .25rem .25rem;
+  width: 100%;
+  min-height: calc(100% - 2.25rem);
+  padding: .5rem;
+  box-sizing: border-box;
+  background: var(--background-canvas-overlay);
+  border-radius: 0 0 1.5rem 1.5rem;
 `;
 
 const Group = styled.div`
-  padding: .25rem .5rem;
-  border-radius: .875rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding: .75rem .5rem;
+  box-sizing: border-box;
+  border-radius: 1rem;
   background: var(--surface-card);
-  box-shadow: 0 .125rem .5rem var(--black-4);
 `;
 
 const Row = styled.div`
   display: flex;
   align-items: center;
-  min-height: 3.75rem;
-  gap: 1rem;
-  padding: .5rem .25rem;
-  &:not(:last-child) { border-bottom: 1px solid var(--black-4); }
+  min-height: 2.625rem;
+  gap: .5rem;
+  padding: .625rem;
+  box-sizing: border-box;
+  border-radius: .75rem;
+  background: var(--black-4);
   > div:first-child { flex: 1; min-width: 0; }
   h4 {
     margin: 0;
     color: var(--text-black-l-title);
-    font-size: .6875rem;
+    font-size: .75rem;
     font-weight: 700;
   }
   p {
     margin: .125rem 0 0;
     color: var(--text-black-s-content);
-    font-size: .5625rem;
-    line-height: 1.35;
+    font-size: .75rem;
+    font-weight: 500;
+    line-height: normal;
   }
 `;
 
 const Pill = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 4.75rem;
-  height: 1.75rem;
-  padding: 0 .625rem;
+  height: 2rem;
+  padding: 0 .75rem;
   border: 0;
-  border-radius: .875rem;
-  background: var(--black-4);
-  color: var(--text-black-l-title);
-  font-size: .625rem;
-  font-weight: 600;
+  border-radius: .5rem;
+  background: var(--button-black-l);
+  color: var(--white-100);
+  font-size: .75rem;
+  font-weight: 700;
   cursor: pointer;
-  &:disabled { opacity: .45; cursor: not-allowed; }
+  &:hover:not(:disabled) { background: var(--dark-mode-button); }
+  &:disabled {
+    background: var(--black-4);
+    color: var(--text-black-s-content);
+    cursor: not-allowed;
+  }
 `;
 
 const ResetPill = styled(Pill)`
   background: var(--selection-error-fill);
   color: var(--selection-error-border);
+  &:hover:not(:disabled) {
+    background: var(--selection-error-fill);
+    filter: brightness(.96);
+  }
 `;
 
 const Overlay = styled.div`
@@ -128,15 +153,15 @@ const ModalBox = styled.div`
 const ModalTitle = styled.h3`
   margin: 0 0 .75rem;
   color: var(--text-black-l-title);
-  font-size: .875rem;
-  font-weight: 900;
+  font-size: .75rem;
+  font-weight: 700;
 `;
 
 const ModalText = styled.p`
   margin: 0 0 1rem;
   color: var(--text-black-s-content);
   font-size: .75rem;
-  line-height: 1.7;
+  line-height: 1.6;
 `;
 
 const ModalActions = styled.div`
@@ -147,12 +172,13 @@ const ModalActions = styled.div`
 
 const ModalButton = styled(Pill)<{$primary?: boolean}>`
   background: ${(p) => (p.$primary ? 'var(--dark-mode-button)' : 'var(--button-black-xs-min)')};
-  color: ${(p) => (p.$primary ? '#fff' : 'var(--text-black-l-title)')};
+  color: ${(p) => (p.$primary ? 'var(--white-100)' : 'var(--text-black-l-title)')};
 `;
 
 const CloseIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.88 18.29 9.17 12 2.88 5.71 4.3 4.29 10.59 10.6 16.89 4.3z" />
+    <path fillRule="evenodd" d="M6 4.75A3.25 3.25 0 0 0 2.75 8v4A3.25 3.25 0 0 0 6 15.25h8A3.25 3.25 0 0 0 17.25 12V8A3.25 3.25 0 0 0 14 4.75zM1.25 8A4.75 4.75 0 0 1 6 3.25h8A4.75 4.75 0 0 1 18.75 8v4A4.75 4.75 0 0 1 14 16.75H6A4.75 4.75 0 0 1 1.25 12z" clipRule="evenodd" />
+    <path fillRule="evenodd" d="M8.762 7.702a.75.75 0 0 0-1.06 1.06L8.938 10 7.7 11.237a.75.75 0 1 0 1.061 1.061L10 11.061l1.237 1.237a.75.75 0 1 0 1.06-1.06L11.06 10l1.238-1.237a.75.75 0 0 0-1.061-1.061L10 8.939z" clipRule="evenodd" />
   </svg>
 );
 
