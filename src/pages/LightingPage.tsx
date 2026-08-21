@@ -919,7 +919,7 @@ export const LightingPage: React.FC = () => {
   if (zones.length === 0) {
     return (
       <Page>
-        <DeviceHeader />
+        <DeviceHeader showControls={false} />
         <PageNav><NavTabs /></PageNav>
         <Card>
           <p style={{fontSize: '0.75rem', color: 'var(--text-black-s-content)'}}>
@@ -932,7 +932,7 @@ export const LightingPage: React.FC = () => {
 
   return (
     <Page>
-      <DeviceHeader />
+      <DeviceHeader showControls={false} />
       <PageNav><NavTabs /></PageNav>
       <Card>
         <ZoneTabs>

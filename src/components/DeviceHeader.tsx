@@ -15,7 +15,8 @@ const Header = styled.div`
 
 const Toolbar = styled.div`
   position: relative;
-  width: 45.2rem;
+  /* 与按键定义页 PressKeyPage.Toolbar 保持同一宽度和定位基准。 */
+  width: 54.8rem;
   height: 4.125rem;
   margin: 0 auto;
   & > ul { position: absolute; right: .5rem; top: 1rem; }
@@ -30,16 +31,25 @@ const ResetButton = styled.button`
   justify-content: center;
   gap: .25rem;
   width: 3.6rem;
-  padding: 0;
+  padding: .25rem .45rem;
+  box-sizing: border-box;
+  background: var(--button-inactive-background);
+  box-shadow: 0 1px 4px var(--black-4);
+  cursor: pointer;
+  transition: background 0.15s;
   color: var(--text-black-l-title);
   font-size: .75rem;
   font-weight: 700;
   border-radius: .375rem;
   svg { width: .875rem; height: .875rem; fill: currentColor; }
-  &:hover { background: var(--black-4); }
+  &:hover { background: var(--surface-hover); }
 `;
 
-export const DeviceHeader: React.FC = () => {
+type DeviceHeaderProps = {
+  showControls?: boolean;
+};
+
+export const DeviceHeader: React.FC<DeviceHeaderProps> = ({showControls = true}) => {
   const location = useLocation();
   const {keys, keymap, currentLayer, layerCount, profile, definition, model, setLayer, resetLayer} = useKeyboardStore();
   const layer = keymap[currentLayer] ?? [];
@@ -56,17 +66,19 @@ export const DeviceHeader: React.FC = () => {
         onKeyClick={() => undefined}
         lightingPreview={location.pathname === '/light'}
       />
-      <Toolbar>
-        <ResetButton onClick={() => resetLayer(currentLayer)} title="重置当前层">
-          <svg viewBox="0 0 24 24"><use href={`${navSprite}#reset`} /></svg>重置
-        </ResetButton>
-        <LayerSwitcher
-          layerCount={Math.min(Math.max(layerCount - (profile === 'windows' ? 4 : 0), 0), 4)}
-          current={currentLayer}
-          layerOffset={profile === 'windows' ? 4 : 0}
-          onChange={setLayer}
-        />
-      </Toolbar>
+      {showControls && (
+        <Toolbar>
+          <ResetButton onClick={() => resetLayer(currentLayer)} title="重置当前层">
+            <svg viewBox="0 0 24 24"><use href={`${navSprite}#reset`} /></svg>重置
+          </ResetButton>
+          <LayerSwitcher
+            layerCount={Math.min(Math.max(layerCount - (profile === 'windows' ? 4 : 0), 0), 4)}
+            current={currentLayer}
+            layerOffset={profile === 'windows' ? 4 : 0}
+            onChange={setLayer}
+          />
+        </Toolbar>
+      )}
     </Header>
   );
 };
