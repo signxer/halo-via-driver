@@ -449,6 +449,21 @@ const ColorHeader = styled.div`
   flex: 0 1 auto;
 `;
 
+const ColorSwitchButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  &:focus-visible {
+    outline: 1px solid var(--theme-color);
+    outline-offset: .125rem;
+    border-radius: 5rem;
+  }
+`;
+
 const ColorTitle = styled.span`
   font-size: .875rem;
   font-weight: 900;
@@ -456,11 +471,14 @@ const ColorTitle = styled.span`
   color: var(--text-black-l-title);
 `;
 
-const ColorContent = styled.div`
+const ColorContent = styled.div<{$disabled?: boolean}>`
   display: flex;
   flex: 1 0 0;
   min-height: 0;
   gap: .5rem;
+  opacity: ${(p) => (p.$disabled ? .42 : 1)};
+  pointer-events: ${(p) => (p.$disabled ? 'none' : 'auto')};
+  transition: opacity .15s ease;
 `;
 
 const ColorPickerColumn = styled.div`
@@ -750,6 +768,8 @@ export const LightingPage: React.FC = () => {
   const [pickerSat, setPickerSat] = useState(initialHsv.s / 255);
   const [pickerValue, setPickerValue] = useState(initialHsv.v / 255);
   const [recent, setRecent] = useState<string[]>(readRecent());
+  const [customColorEnabled, setCustomColorEnabled] = useState(true);
+  const colorCommitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousEffect = useRef<Record<number, number>>({});
   const zoneEffects = useRef<Record<number, number>>({});
 
@@ -834,6 +854,10 @@ export const LightingPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, api, zoneIdx]);
 
+  useEffect(() => () => {
+    if (colorCommitTimer.current) clearTimeout(colorCommitTimer.current);
+  }, []);
+
   const write = async (item: {channel: number; command: number}, ...vals: number[]) => {
     if (mode === 'connected' && api) {
       try {
@@ -842,7 +866,7 @@ export const LightingPage: React.FC = () => {
     }
   };
 
-  const applyColor = (hex: string) => {
+  const updateColorPreview = (hex: string) => {
     if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
     setColor(hex);
     setHexText(hex);
@@ -850,14 +874,48 @@ export const LightingPage: React.FC = () => {
     setPickerHue(h);
     setPickerSat(s / 255);
     setPickerValue(v / 255);
+  };
+
+  const commitColor = (hex: string) => {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    updateColorPreview(hex);
     // QMK RGB Matrix 的 color 菜单只有 H/S 两个字节；V 不在这里写，
     // 而是由同一个区域的 Brightness 菜单单独控制。
-    if (colorItem) write(colorItem, degToHue(h), s);
+    if (colorItem && customColorEnabled) {
+      const {h, s} = hexToHsv(hex);
+      void write(colorItem, degToHue(h), s);
+    }
     const next = [hex, ...recent.filter((c) => c !== hex)].slice(0, 8);
     setRecent(next);
     try {
       localStorage.setItem(RECENT_KEY, JSON.stringify(next));
     } catch {}
+  };
+
+  const scheduleColorCommit = (hex: string) => {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    if (colorCommitTimer.current) clearTimeout(colorCommitTimer.current);
+    colorCommitTimer.current = setTimeout(() => {
+      colorCommitTimer.current = null;
+      if (customColorEnabled) commitColor(hex);
+    }, 1500);
+  };
+
+  const toggleCustomColor = () => {
+    if (colorCommitTimer.current) {
+      clearTimeout(colorCommitTimer.current);
+      colorCommitTimer.current = null;
+    }
+    const next = !customColorEnabled;
+    setCustomColorEnabled(next);
+    if (next) {
+      // 开启时重新写入当前颜色；关闭时只重新应用当前效果，让固件回到效果自身的颜色逻辑。
+      if (colorItem) {
+        const {h, s} = hexToHsv(color);
+        void write(colorItem, degToHue(h), s);
+      }
+    }
+    if (effectItem) void write(effectItem, effectValue);
   };
 
   const pickColorSquare = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -866,7 +924,9 @@ export const LightingPage: React.FC = () => {
     const y = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
     setPickerSat(x);
     setPickerValue(1 - y);
-    applyColor(hsvToHex(pickerHue, Math.round(x * 255), Math.round((1 - y) * 255)));
+    const nextColor = hsvToHex(pickerHue, Math.round(x * 255), Math.round((1 - y) * 255));
+    updateColorPreview(nextColor);
+    scheduleColorCommit(nextColor);
   };
 
   const pickHue = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -874,7 +934,9 @@ export const LightingPage: React.FC = () => {
     const x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
     const nextHue = Math.round(x * 360);
     setPickerHue(nextHue);
-    applyColor(hsvToHex(nextHue, Math.round(pickerSat * 255), Math.round(pickerValue * 255)));
+    const nextColor = hsvToHex(nextHue, Math.round(pickerSat * 255), Math.round(pickerValue * 255));
+    updateColorPreview(nextColor);
+    scheduleColorCommit(nextColor);
   };
 
   const setEffectValue = (next: number) => {
@@ -1111,8 +1173,17 @@ export const LightingPage: React.FC = () => {
           <ColorPanel>
             <ColorHeader>
               <ColorTitle>自定义颜色</ColorTitle>
+              <ColorSwitchButton
+                type="button"
+                role="switch"
+                aria-label="启用自定义颜色"
+                aria-checked={customColorEnabled}
+                onClick={toggleCustomColor}
+              >
+                <ZoneSwitch $on={customColorEnabled} />
+              </ColorSwitchButton>
             </ColorHeader>
-            <ColorContent>
+            <ColorContent $disabled={!customColorEnabled}>
               <ColorPickerColumn>
                 <ColorWheel
                   ref={colorWheelRef}
@@ -1136,7 +1207,10 @@ export const LightingPage: React.FC = () => {
                 <ColorInput
                   type="color"
                   value={color}
-                  onChange={(e) => applyColor(e.target.value)}
+                  onChange={(e) => {
+                    updateColorPreview(e.target.value);
+                    scheduleColorCommit(e.target.value);
+                  }}
                 />
                 <ColorInputRow>
                   <ColorLabel>HEX</ColorLabel>
@@ -1145,7 +1219,13 @@ export const LightingPage: React.FC = () => {
                     onChange={(e) => {
                       setHexText(e.target.value);
                       const v = e.target.value;
-                      if (/^#[0-9a-fA-F]{6}$/.test(v)) applyColor(v);
+                      if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+                        updateColorPreview(v);
+                        scheduleColorCommit(v);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (/^#[0-9a-fA-F]{6}$/.test(hexText)) commitColor(hexText);
                     }}
                   />
                 </ColorInputRow>
@@ -1160,7 +1240,7 @@ export const LightingPage: React.FC = () => {
                         title={`选择颜色 ${c}`}
                         style={{background: c}}
                         $active={c === color}
-                        onClick={() => applyColor(c)}
+                        onClick={() => commitColor(c)}
                       />
                     ))}
                   </Swatches>
@@ -1173,7 +1253,7 @@ export const LightingPage: React.FC = () => {
                         key={c}
                         title={`选择最近使用颜色 ${c}`}
                         style={{background: c}}
-                        onClick={() => applyColor(c)}
+                        onClick={() => commitColor(c)}
                       />
                     ))}
                   </Swatches>
