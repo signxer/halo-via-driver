@@ -3,9 +3,15 @@ import styled from 'styled-components';
 import {NavTabs} from '../components/NavTabs';
 import {DeviceHeader} from '../components/DeviceHeader';
 import {useKeyboardStore} from '../store/keyboard';
-import {getMacroAPI, isDelaySupported} from '../via/macro-api';
+import {getMacroAPI, getMacroValidator, isDelaySupported} from '../via/macro-api';
 import type {RawKeycodeSequence} from '../via/macro-api/types';
 import {RawKeycodeSequenceAction} from '../via/macro-api/types';
+import {
+  expressionToSequence,
+  optimizedSequenceToRawSequence,
+  rawSequenceToOptimizedSequence,
+  sequenceToExpression,
+} from '../via/macro-api/macro-api.common';
 import {mapEvtToKeycode} from '../via/key-event';
 
 const Page = styled.div`
@@ -197,79 +203,62 @@ const MacroEditorTitle = styled.div`
   color: var(--text-black-l-title);
 `;
 
-const IntervalRow = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: .75rem;
-`;
-
-const IntervalButtons = styled.div`
-  display: flex;
-  gap: .25rem;
-  margin: 0;
-  button {
-    height: 1.5rem;
-    padding: 0 .75rem;
-    border-radius: .5rem;
-    font-size: .625rem;
-    font-weight: 600;
-    background: var(--black-4);
-    color: var(--text-black-l-title);
-  }
-  button:first-child { background: var(--button-active-background); color: var(--button-active-text); }
-`;
-
-const BindingTitle = styled.div`
-  font-size: .875rem;
-  font-weight: 900;
-  line-height: normal;
-  color: var(--text-black-l-title);
-`;
-
-const BindingSlots = styled.div`
-  display: flex;
-  gap: .625rem 1.375rem;
-  flex-wrap: wrap;
-`;
-
-const BindingSlot = styled.div<{$plus?: boolean; $active?: boolean}>`
-  width: 3rem;
-  height: 3rem;
-  border: 1px dashed ${(p) => (p.$active ? 'var(--theme-color)' : 'var(--black-16)')};
-  border-radius: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const CodeHint = styled.div`
+  flex: 0 0 auto;
   color: var(--text-black-s-content);
-  font-size: .75rem;
-  font-weight: 700;
-  padding: 0 .36rem;
-  box-sizing: border-box;
-  background: ${(p) => (p.$active ? 'var(--selection-fill)' : p.$plus ? 'transparent' : 'transparent')};
-  flex-direction: column;
-  color: var(--text-black-s-content);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  &::after { content: ${(p) => (p.$plus ? "'+'" : "'--'")}; margin-top: .25rem; color: var(--text-black-s-content); }
+  font-size: .625rem;
+  line-height: 1.45;
 `;
 
-const RecorderAction = styled.button`
+const CodeActions = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: .5rem;
+`;
+
+const SaveButton = styled.button`
+  min-height: 1.75rem;
+  padding: .25rem .75rem;
   border: 0;
-  background: transparent;
-  color: var(--text-black-l-title);
+  border-radius: .375rem;
+  background: var(--button-active-background);
+  color: var(--button-active-text);
   font-size: .6875rem;
   font-weight: 700;
   cursor: pointer;
-  &:hover { color: var(--theme-color); }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+  &:not(:disabled):hover { opacity: .86; }
+`;
+
+const RecorderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+`;
+
+const RecorderAction = styled.button<{$active?: boolean}>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.75rem;
+  padding: .25rem .625rem;
+  border: 0;
+  border-radius: .375rem;
+  background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'var(--button-inactive-background)')};
+  color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-black-l-title)')};
+  font-size: .6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  &:hover { opacity: .86; }
 `;
 
 const RecorderRows = styled.div`
   max-height: 8.5rem;
   overflow-y: auto;
-  font-size: .625rem;
-  color: var(--text-black-s-content);
+  font-size: .6875rem;
+  color: var(--text-black-l-title);
 `;
 
 const RecorderRow = styled.div`
@@ -279,12 +268,16 @@ const RecorderRow = styled.div`
   align-items: center;
   min-height: 1.5rem;
   border-bottom: 1px solid var(--black-4);
+  color: var(--text-black-l-title);
+  font-weight: 500;
   text-align: center;
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  min-height: 4rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   padding: 12px 14px;
@@ -292,20 +285,12 @@ const TextArea = styled.textarea`
   font-size: 0.75rem;
   line-height: 1.6;
   color: var(--text-primary);
-  resize: vertical;
+  resize: none;
   outline: none;
+  background: var(--surface-card);
   &:focus {
     border-color: var(--brand);
   }
-`;
-
-const Toolbar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-  gap: 12px;
-  flex-wrap: wrap;
 `;
 
 const ErrorMsg = styled.div`
@@ -329,11 +314,15 @@ const Recorder = styled.div`
   box-sizing: border-box;
   border-radius: 1rem;
   background: var(--surface-card);
-  color: var(--text-black-s-content);
+  color: var(--text-black-l-title);
   font-size: .6875rem;
 `;
 
 const RecorderTitle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
   font-size: .875rem;
   font-weight: 900;
   line-height: normal;
@@ -345,7 +334,7 @@ const RecorderHeaders = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1.2fr 1fr 1fr;
   gap: .5rem;
-  color: var(--text-black-s-content);
+  color: var(--text-black-l-title);
   font-size: .5625rem;
   text-align: center;
   padding: .75rem 0 .5rem;
@@ -374,28 +363,9 @@ function sequenceToText(seq: RawKeycodeSequence | undefined): string {
     .join('\n');
 }
 
-// 解析多行文本 → 序列。每行:Tap KC_A / Down KC_LSFT / Delay 50 / Type "hello"
-function textToSequence(text: string): RawKeycodeSequence {
-  const lines = text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
-  const seq: RawKeycodeSequence = [];
-  for (const line of lines) {
-    const tap = line.match(/^Tap\s+(.+)$/i);
-    const down = line.match(/^Down\s+(.+)$/i);
-    const up = line.match(/^Up\s+(.+)$/i);
-    const delay = line.match(/^Delay\s+(\d+)$/i);
-    const type = line.match(/^Type\s+"(.+)"$/i);
-    if (tap) seq.push([RawKeycodeSequenceAction.Tap, tap[1].trim()]);
-    else if (down) seq.push([RawKeycodeSequenceAction.Down, down[1].trim()]);
-    else if (up) seq.push([RawKeycodeSequenceAction.Up, up[1].trim()]);
-    else if (delay) seq.push([RawKeycodeSequenceAction.Delay, Number(delay[1])]);
-    else if (type) seq.push([RawKeycodeSequenceAction.CharacterStream, type[1]]);
-    else throw new Error(`无法解析的行: ${line}`);
-  }
-  return seq;
-}
+// VIA 宏代码格式：{KC_A}、{+KC_LSFT}、{-KC_LSFT}、{50}，普通文字可直接输入。
+const sequenceToCode = (sequence: RawKeycodeSequence | undefined): string =>
+  sequenceToExpression(rawSequenceToOptimizedSequence(sequence ?? []));
 
 export const MacroPage: React.FC = () => {
   const {mode, api, protocolVersion, initDemo} = useKeyboardStore();
@@ -408,7 +378,6 @@ export const MacroPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recorded, setRecorded] = useState<RawKeycodeSequence>([]);
-  const recordStart = useRef(0);
   const lastRecordAt = useRef(0);
 
   useEffect(() => {
@@ -428,6 +397,8 @@ export const MacroPage: React.FC = () => {
       const macroApi = getMacroAPI(protocolVersion, 13, api);
       const sequences = await macroApi.readRawKeycodeSequences();
       setMacros(sequences);
+      setText(sequenceToCode(sequences[0]));
+      setRecorded(sequences[0] ?? []);
       setError(null);
     } catch (e: any) {
       setError(e?.message ?? '读取宏失败');
@@ -444,7 +415,7 @@ export const MacroPage: React.FC = () => {
 
   const selectMacro = (i: number) => {
     setActive(i);
-    setText(sequenceToText(macros[i]));
+    setText(sequenceToCode(macros[i]));
     setError(null);
     setRecorded(macros[i] ?? []);
   };
@@ -464,15 +435,13 @@ export const MacroPage: React.FC = () => {
       next.push([RawKeycodeSequenceAction.Tap, keycode]);
       lastRecordAt.current = now;
       setRecorded(next);
-      setText(sequenceToText(next));
+      setText(sequenceToCode(next));
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [recording, recorded]);
 
   const startRecording = () => {
-    const now = Date.now();
-    recordStart.current = now;
     lastRecordAt.current = 0;
     setRecorded([]);
     setText('');
@@ -488,13 +457,17 @@ export const MacroPage: React.FC = () => {
 
   const saveMacro = async () => {
     if (active < 0) return;
-    // 校验延迟支持
-    if (!isDelaySupported(protocolVersion) && /delay/i.test(text)) {
+    const validation = getMacroValidator(protocolVersion)(text);
+    if (!validation.isValid) {
+      setError(validation.errorMessage ?? '宏代码格式错误');
+      return;
+    }
+    if (!isDelaySupported(protocolVersion) && /\{\d+\}/.test(text)) {
       setError('当前键盘固件协议不支持 Delay 指令');
       return;
     }
     try {
-      const newSeq = textToSequence(text);
+      const newSeq = optimizedSequenceToRawSequence(expressionToSequence(text));
       const next = [...macros];
       next[active] = newSeq;
       setSaving(true);
@@ -548,54 +521,35 @@ export const MacroPage: React.FC = () => {
           <EditorItem>
             <MacroEditorTitle>MACRO {active >= 0 ? active + 1 : 1}</MacroEditorTitle>
           </EditorItem>
-          <EditorItem>
-            <IntervalRow><span>间隔时间</span><span>－　ms</span></IntervalRow>
-            <IntervalButtons><button>实际间隔时间</button><button>默认间隔时间</button></IntervalButtons>
-          </EditorItem>
           <EditorBindings>
-            <BindingTitle>按键绑定</BindingTitle>
-            <BindingSlots>
-              <BindingSlot $active>待分配</BindingSlot>
-              <BindingSlot>待分配</BindingSlot>
-              <BindingSlot>待分配</BindingSlot>
-              <BindingSlot $plus>＋</BindingSlot>
-            </BindingSlots>
-          <div style={{display:'none'}}>
-          <TextArea
-            value={active >= 0 ? text : ''}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={'Tap KC_A\nDown KC_LSFT\nDelay 50'}
-          />
-          {error && <ErrorMsg>⚠️ {error}</ErrorMsg>}
-          <Toolbar>
-            <span style={{fontSize: '0.625rem', color: 'var(--text-tertiary)'}}>按键绑定　　待分配　　待分配　　＋ 新建绑定</span>
-            <button className="btn-primary" onClick={saveMacro} disabled={saving || active < 0}>
-              {saving ? '保存中…' : '保存宏'}
-            </button>
-          </Toolbar>
-          </div>
-          <div style={{display:'none'}}>
+            <MacroEditorTitle>宏代码</MacroEditorTitle>
             <TextArea
               aria-label="宏内容"
               value={active >= 0 ? text : ''}
               onChange={(e) => setText(e.target.value)}
-              placeholder={'Tap KC_A\nDown KC_LSFT\nDelay 50'}
+              placeholder={'{KC_A}{+KC_LSFT}hello{-KC_LSFT}{50}'}
             />
+            <CodeHint>
+              {`{KC_A} 按键　{+KC_LSFT} 按下　{-KC_LSFT} 释放　{50} 延时；普通文字可直接输入。`}
+            </CodeHint>
             {error && <ErrorMsg>⚠️ {error}</ErrorMsg>}
-            <Toolbar>
-              <span style={{fontSize: '0.625rem', color: 'var(--text-tertiary)'}}>每行一个动作：Tap / Down / Up / Delay / Type</span>
-              <button className="btn-primary" onClick={saveMacro} disabled={saving || active < 0}>
-                {saving ? '保存中…' : '保存宏'}
-              </button>
-            </Toolbar>
-          </div>
+            <CodeActions>
+              <SaveButton onClick={saveMacro} disabled={saving || active < 0}>
+                {saving ? '保存中…' : '保存宏代码'}
+              </SaveButton>
+            </CodeActions>
           </EditorBindings>
         </Editor>
         <Recorder>
-          <RecorderTitle>宏键录制 <span style={{float:'right',fontWeight:500}}>
-            <RecorderAction onClick={clearRecording}>清除数据</RecorderAction>
-            <RecorderAction onClick={() => recording ? setRecording(false) : startRecording()}>{recording ? '停止录制' : '开始录制'}</RecorderAction>
-          </span></RecorderTitle>
+          <RecorderTitle>
+            <span>宏键录制</span>
+            <RecorderActions>
+              <RecorderAction onClick={clearRecording}>清除数据</RecorderAction>
+              <RecorderAction $active={recording} onClick={() => recording ? setRecording(false) : startRecording()}>
+                {recording ? '停止录制' : '开始录制'}
+              </RecorderAction>
+            </RecorderActions>
+          </RecorderTitle>
           <RecorderHeaders><span>序号</span><span>按键</span><span>状态</span><span>时间(ms)</span><span>向上插入</span><span>向下插入</span></RecorderHeaders>
           {recorded.length === 0 ? <div style={{textAlign:'center',paddingTop:'5rem'}}>数据逃跑了</div> : (
             <RecorderRows>
@@ -607,31 +561,6 @@ export const MacroPage: React.FC = () => {
             </RecorderRows>
           )}
         </Recorder>
-        {false && (
-          <Editor>
-            <div style={{fontSize: 13, fontWeight: 600, marginBottom: 8}}>
-              编辑 Macro {active + 1}
-            </div>
-            <TextArea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={'Tap KC_A\nDown KC_LSFT\nDelay 50\nType "hello"'}
-            />
-            {error && <ErrorMsg>⚠️ {error}</ErrorMsg>}
-            <Toolbar>
-              <span style={{fontSize: 12, color: 'var(--text-tertiary)'}}>
-                每行一个动作:Tap / Down / Up / Delay / Type
-              </span>
-              <button
-                className="btn-primary"
-                onClick={saveMacro}
-                disabled={saving}
-              >
-                {saving ? '保存中…' : '保存宏'}
-              </button>
-            </Toolbar>
-          </Editor>
-        )}
       </Card>
     </Page>
   );
