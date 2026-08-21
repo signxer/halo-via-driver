@@ -185,47 +185,6 @@ const MacroIcon: React.FC<{className?: string}> = ({className}) => (
   </svg>
 );
 
-const KeycodeGlyph = styled.svg.attrs({viewBox: '0 0 24 24', 'aria-hidden': true})`
-  display: block;
-  width: 1.75rem;
-  height: 1.75rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  .glyph-fill { fill: currentColor; stroke: none; }
-`;
-
-function renderKeycodeGlyph(code: string): React.ReactNode {
-  if (/^MACRO/i.test(code)) return <MacroIcon />;
-  if (code === 'KC_NO') {
-    return (
-      <KeycodeGlyph>
-        <rect x="3" y="3" width="18" height="18" rx="4" />
-        <path d="m7 7 10 10M17 7 7 17" />
-      </KeycodeGlyph>
-    );
-  }
-  if (code === 'KC_TRNS') {
-    return (
-      <KeycodeGlyph>
-        <rect x="3" y="3" width="18" height="18" rx="4" />
-        <path d="M7 12h10M13 8l4 4-4 4" />
-      </KeycodeGlyph>
-    );
-  }
-  if (/^(MO|LT|TO|TG|TT|OSL|DF|MT|LM|OSM)\(/.test(code)) {
-    return (
-      <KeycodeGlyph>
-        <rect x="3" y="3" width="18" height="18" rx="4" />
-        <path d="M7 15V9h1.4l1.6 2.45L11.6 9H13v6M15 9v6" />
-      </KeycodeGlyph>
-    );
-  }
-  return null;
-}
-
 const NavBtnName = styled.span<{$active: boolean}>`
   display: block;
   min-width: 0;
@@ -761,7 +720,6 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
     const label = KEY_LABELS[k.code] ?? k.shortName ?? k.name.split('\n')[0];
     const explanation = keycodeExplanation(k.code, k.title ?? k.name);
     const iconSprite = KEY_SPRITE_ICONS.has(icon ?? '') ? keySprite : navSprite;
-    const fallbackGlyph = renderKeycodeGlyph(k.code);
     return (
       <KeyTooltip
         key={`${k.code}-${i}`}
@@ -778,7 +736,7 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
           <svg aria-hidden="true" fill="currentColor" color="inherit">
             <use href={`${iconSprite}#${icon}`} fill="currentColor" color="inherit" />
           </svg>
-        ) : fallbackGlyph ?? <KeyLabel>{label}</KeyLabel>}
+        ) : <KeyLabel>{label}</KeyLabel>}
       </KeyTooltip>
     );
   };
