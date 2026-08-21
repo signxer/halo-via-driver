@@ -1,0 +1,30 @@
+name: Sync Vercel mirror
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mirror main to the Vercel repository
+        env:
+          MIRROR_TOKEN: ${{ secrets.VERCEL_MIRROR_TOKEN }}
+        run: |
+          test -n "$MIRROR_TOKEN"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add vercel-mirror "https://x-access-token:${MIRROR_TOKEN}@github.com/signxer/nuphy-driver-vercel.git"
+          git push --force vercel-mirror HEAD:main
