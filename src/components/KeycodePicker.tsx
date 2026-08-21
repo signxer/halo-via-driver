@@ -9,6 +9,7 @@ import {keycodeExplanation, remapLabels} from '../i18n';
 import navSprite from '../assets/nuphy/icons/nav-symbols.svg?url';
 import keySprite from '../assets/nuphy/icons/key-symbols.svg?url';
 import type {CustomKeycode} from '../types/definition';
+import type {HostProfile} from '../store/keyboard';
 
 // ============================================================
 // 原版键码选择面板 — 像素级复刻
@@ -663,10 +664,11 @@ type KeycodePickerProps = {
   customKeycodes?: CustomKeycode[];
   currentValue: number;
   onSelect: (value: number) => void;
+  hostProfile?: HostProfile;
 };
 
 export const KeycodePicker: React.FC<KeycodePickerProps> = ({
-  customKeycodes, currentValue, onSelect,
+  customKeycodes, currentValue, onSelect, hostProfile = 'mac',
 }) => {
   const groups = useMemo(() => buildKeycodeGroups(customKeycodes), [customKeycodes]);
   const [activeTab, setActiveTab] = useState(groups[0]?.id ?? 'basic');
@@ -717,7 +719,10 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
   ) => {
     const val = toByteValue(k);
     const icon = KEY_ICONS[k.code] ?? CUSTOM_KEY_ICONS[k.title ?? k.name.replace(/\n/g, ' ')];
-    const label = KEY_LABELS[k.code] ?? k.shortName ?? k.name.split('\n')[0];
+    const platformLabels: Record<string, string> = hostProfile === 'windows'
+      ? {KC_LGUI: 'WIN', KC_RGUI: 'WIN', KC_LALT: 'ALT', KC_RALT: 'ALT'}
+      : {KC_LGUI: 'CMD', KC_RGUI: 'CMD', KC_LALT: 'OPT', KC_RALT: 'OPT'};
+    const label = platformLabels[k.code] ?? KEY_LABELS[k.code] ?? k.shortName ?? k.name.split('\n')[0];
     const explanation = keycodeExplanation(k.code, k.title ?? k.name);
     const iconSprite = KEY_SPRITE_ICONS.has(icon ?? '') ? keySprite : navSprite;
     return (

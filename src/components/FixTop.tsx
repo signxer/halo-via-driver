@@ -14,7 +14,7 @@ import {messages} from '../i18n';
 //     .rightRightBox (bg white, radius 0.75rem, padding 0.125rem)
 //       .mBoxBac.pointer  — M1 + 设备名
 //       键盘图标           — 连接/断开
-//       MoreBox 下拉       — IO 手册
+//       MoreBox 下拉       — VIA 使用说明
 //       SettingGear        — 设置
 // ============================================================
 
@@ -448,7 +448,7 @@ export const FixTop: React.FC = () => {
             {menuOpen && (
               <MoreMenu onMouseLeave={() => setMenuOpen(false)}>
                 <MoreItem onClick={() => { setMenuOpen(false); setIoModal(true); }}>
-                  {messages.GlobalSettingsPage?.IOManual ?? 'IO 手册'}
+                  {messages.GlobalSettingsPage?.IOManual ?? 'VIA 使用说明'}
                 </MoreItem>
               </MoreMenu>
             )}
@@ -515,7 +515,7 @@ export const FixTop: React.FC = () => {
       {ioModal && (
         <IOModalOverlay onClick={() => setIoModal(false)}>
           <IOModalBox onClick={(e) => e.stopPropagation()}>
-            <IOModalTitle>{messages.GlobalSettingsPage?.IOManual ?? 'IO 手册'}</IOModalTitle>
+            <IOModalTitle>{messages.GlobalSettingsPage?.IOManual ?? 'VIA 使用说明'}</IOModalTitle>
             <IOModalText>
               {messages.GlobalSettingsPage?.AuthorizedTips1 ??
                 '在浏览器弹出的授权弹窗中选中您的 NuPhy Halo 键盘并单击「连接」。'}

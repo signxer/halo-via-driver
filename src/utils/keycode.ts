@@ -11,8 +11,15 @@ const protocol = 12;
 const basicDict = getBasicKeyDict(protocol, 13);
 const byteToKey = getByteToKey(basicDict);
 
-// 键帽标签:原版字形(如 "!\n1"、"~`"、"Esc"),CSS 负责大写
-export function keycodeLabel(keycode: number, custom: CustomKeycode[] = []): string {
+export type KeyLabelProfile = 'mac' | 'windows';
+
+// 键帽标签:原版字形(如 "!\n1"、"~`"、"Esc"),CSS 负责大写。
+// 修饰键按当前 M1/M2 配置显示不同平台名称。
+export function keycodeLabel(
+  keycode: number,
+  custom: CustomKeycode[] = [],
+  profile: KeyLabelProfile = 'mac',
+): string {
   if (keycode === 0x00) return '';
   // NuPhy 自定义键码
   if (keycode >= CUSTOM_KEYCODE_START) {
@@ -27,7 +34,10 @@ export function keycodeLabel(keycode: number, custom: CustomKeycode[] = []): str
     Esc: 'ESC', Bksp: 'BACKSPACE', Del: 'DEL', Tab: 'TAB',
     Caps: 'CAPS', Enter: 'ENTER', PgUp: 'PGUP', PgDn: 'PGDN',
     LShft: 'SHIFT', RShft: 'SHIFT', LCtl: 'CTRL', RCtl: 'CTRL',
-    LWin: 'CMD', RWin: 'CMD', LAlt: 'OPT', RAlt: 'OPT', Space: 'SPACE',
+    LWin: profile === 'windows' ? 'WIN' : 'CMD',
+    RWin: profile === 'windows' ? 'WIN' : 'CMD',
+    LAlt: profile === 'windows' ? 'ALT' : 'OPT',
+    RAlt: profile === 'windows' ? 'ALT' : 'OPT', Space: 'SPACE',
   };
   return physicalLabels[label] ?? label;
 }
@@ -46,14 +56,18 @@ export function getKeycodeName(keycode: number, custom: CustomKeycode[] = []): s
 }
 
 /** 直接复用 NuPhy Halo65 HE 原版 KeyCodeTip 文案。 */
-export function getKeycodeExplanation(keycode: number, custom: CustomKeycode[] = []): string {
+export function getKeycodeExplanation(
+  keycode: number,
+  custom: CustomKeycode[] = [],
+  profile: KeyLabelProfile = 'mac',
+): string {
   if (keycode >= CUSTOM_KEYCODE_START) {
     const idx = keycode - CUSTOM_KEYCODE_START;
     const c = custom[idx];
     return keycodeExplanation(`CUSTOM(${idx})`, c?.title ?? c?.name.replace(/\n/g, ' ') ?? `自定义键码 ${idx + 1}`);
   }
   const code = getCodeForByte(keycode, basicDict, byteToKey);
-  return keycodeExplanation(code ?? '', keycodeLabel(keycode, custom));
+  return keycodeExplanation(code ?? '', keycodeLabel(keycode, custom, profile));
 }
 
 // 键码面板分组

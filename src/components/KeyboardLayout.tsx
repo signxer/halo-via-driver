@@ -1,7 +1,7 @@
 import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import styled from 'styled-components';
 import {CAP_UNIT, KeyCap} from './KeyCap';
-import {keycodeLabel, getKeycodeExplanation} from '../utils/keycode';
+import {keycodeLabel, getKeycodeExplanation, type KeyLabelProfile} from '../utils/keycode';
 import {useThemeStore} from '../store/theme';
 import type {KLEKey, CustomKeycode} from '../types/definition';
 import type {ModelConfig} from '../models';
@@ -104,6 +104,7 @@ type KeyboardLayoutProps = {
   onKeyClick?: (pos: string) => void;
   interactive?: boolean;
   lightingPreview?: boolean;
+  hostProfile?: KeyLabelProfile;
   children?: React.ReactNode;
 };
 
@@ -111,7 +112,7 @@ export const KeyboardLayout: React.FC<KeyboardLayoutProps> = ({
   model,
   keys, keymap, cols, customKeycodes,
   selectedPos, onKeyClick, interactive = true, children,
-  lightingPreview = false,
+  lightingPreview = false, hostProfile = 'mac',
 }) => {
   const theme = useThemeStore((s) => s.theme);
   const [scale, setScale] = useState(1);
@@ -213,7 +214,7 @@ export const KeyboardLayout: React.FC<KeyboardLayoutProps> = ({
               const pos = `${c.row},${c.col}`;
               const label = pos === '4,10' && val >= 0x7e00
                 ? 'FN1'
-                : keycodeLabel(val, customKeycodes);
+                : keycodeLabel(val, customKeycodes, hostProfile);
               const sub = val >= 0x7e00 && label !== 'FN1' ? `C${val - 0x7e00 + 1}` : undefined;
               const rainbowHue = ((c.x / Math.max(BOARD_W, 1)) * 300 + (c.y / Math.max(BOARD_H, 1)) * 10) % 360;
               const lightingColor = lightingPreview
@@ -226,7 +227,7 @@ export const KeyboardLayout: React.FC<KeyboardLayoutProps> = ({
                   x={c.x * geometryScale} y={c.y * geometryScale}
                   unitScale={geometryScale}
                   label={label || ''} subLabel={sub}
-                  tooltip={getKeycodeExplanation(val, customKeycodes)}
+                  tooltip={getKeycodeExplanation(val, customKeycodes, hostProfile)}
                   activeColor={lightingColor}
                   selected={selectedPos === pos}
                   disabled={!interactive}

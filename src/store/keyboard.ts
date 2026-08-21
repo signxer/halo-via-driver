@@ -4,6 +4,8 @@ import {parseKLE} from '../utils/kle';
 import {KeyboardAPI, HID} from '../via';
 import {getActiveModel, getModel, getModelForDevice, type ModelConfig} from '../models';
 import defaultKeymap from '../models/default-keymap.json';
+import {getBasicKeyDict} from '../via/key-to-byte/dictionary-store';
+import {getByteForCode} from '../via/key';
 
 export type ConnectionMode = 'disconnected' | 'demo' | 'connected';
 export type HostProfile = 'mac' | 'windows';
@@ -45,13 +47,109 @@ const loadDefinition = async (model: ModelConfig): Promise<Definition> => {
   return (await res.json()) as Definition;
 };
 
-const buildDemoKeymap = (rows: number, cols: number, layerCount: number): number[][] => {
+type DemoLayout = string[][];
+
+// Halo75V2/Halo96V2 的默认 ANSI 层来自公开的 NuPhy QMK keymap.c。
+// 这里按 VIA JSON 的 KLE 顺序保存，之后再映射回真实的 matrix row/col，
+// 不再把 Halo65 的矩阵硬套到另外两个型号上。
+const HALO75_MAC: DemoLayout = [
+  ['KC_ESC','KC_BRMD','KC_BRMU','MAC_TASK','MAC_SEARCH','MAC_VOICE','MAC_DND','KC_MPRV','KC_MPLY','KC_MNXT','KC_MUTE','KC_VOLD','KC_VOLU','MAC_PRTA','KC_INS','KC_DEL'],
+  ['KC_GRV','KC_1','KC_2','KC_3','KC_4','KC_5','KC_6','KC_7','KC_8','KC_9','KC_0','KC_MINS','KC_EQL','KC_BSPC','KC_HOME'],
+  ['KC_TAB','KC_Q','KC_W','KC_E','KC_R','KC_T','KC_Y','KC_U','KC_I','KC_O','KC_P','KC_LBRC','KC_RBRC','KC_BSLS','KC_END'],
+  ['KC_CAPS','KC_A','KC_S','KC_D','KC_F','KC_G','KC_H','KC_J','KC_K','KC_L','KC_SCLN','KC_QUOT','KC_ENT','KC_PGUP'],
+  ['KC_LSFT','KC_Z','KC_X','KC_C','KC_V','KC_B','KC_N','KC_M','KC_COMM','KC_DOT','KC_SLSH','KC_RSFT','KC_UP','KC_PGDN'],
+  ['KC_LCTL','KC_LOPT','KC_LCMD','KC_SPC','KC_RCMD','MO(1)','KC_LEFT','KC_DOWN','KC_RIGHT'],
+];
+
+const HALO75_WIN: DemoLayout = [
+  ['KC_ESC','KC_F1','KC_F2','KC_F3','KC_F4','KC_F5','KC_F6','KC_F7','KC_F8','KC_F9','KC_F10','KC_F11','KC_F12','WIN_PRTA','KC_INS','KC_DEL'],
+  HALO75_MAC[1], HALO75_MAC[2], HALO75_MAC[3],
+  ['KC_LSFT','KC_Z','KC_X','KC_C','KC_V','KC_B','KC_N','KC_M','KC_COMM','KC_DOT','KC_SLSH','KC_RSFT','KC_UP','KC_PGDN'],
+  ['KC_LCTL','KC_LWIN','KC_LALT','KC_SPC','KC_RALT','MO(3)','KC_LEFT','KC_DOWN','KC_RIGHT'],
+];
+
+const HALO96_MAC: DemoLayout = [
+  ['KC_ESC','KC_SCRL','KC_PAUSE','MAC_TASK','MAC_SEARCH','MAC_VOICE','MAC_DND','KC_MPRV','KC_MPLY','KC_MNXT','KC_MUTE','KC_VOLD','KC_VOLU','MAC_PRTA','KC_DEL','KC_HOME','KC_END','KC_PGUP','KC_PGDN'],
+  ['KC_GRV','KC_1','KC_2','KC_3','KC_4','KC_5','KC_6','KC_7','KC_8','KC_9','KC_0','KC_MINS','KC_EQL','KC_BSPC','KC_NUM','KC_PSLS','KC_PAST','KC_PMNS'],
+  ['KC_TAB','KC_Q','KC_W','KC_E','KC_R','KC_T','KC_Y','KC_U','KC_I','KC_O','KC_P','KC_LBRC','KC_RBRC','KC_BSLS','KC_P7','KC_P8','KC_P9','KC_PPLS'],
+  ['KC_CAPS','KC_A','KC_S','KC_D','KC_F','KC_G','KC_H','KC_J','KC_K','KC_L','KC_SCLN','KC_QUOT','KC_ENT','KC_P4','KC_P5','KC_P6'],
+  ['KC_LSFT','KC_Z','KC_X','KC_C','KC_V','KC_B','KC_N','KC_M','KC_COMM','KC_DOT','KC_SLSH','KC_RSFT','KC_UP','KC_P1','KC_P2','KC_P3','KC_PENT'],
+  ['KC_LCTL','KC_LALT','KC_LGUI','KC_SPC','KC_RGUI','MO(1)','KC_LEFT','KC_DOWN','KC_RGHT','KC_P0','KC_PDOT'],
+];
+
+const HALO96_WIN: DemoLayout = [
+  ['KC_ESC','KC_F1','KC_F2','KC_F3','KC_F4','KC_F5','KC_F6','KC_F7','KC_F8','KC_F9','KC_F10','KC_F11','KC_F12','WIN_PRTA','KC_DEL','KC_HOME','KC_END','KC_PGUP','KC_PGDN'],
+  HALO96_MAC[1], HALO96_MAC[2], HALO96_MAC[3],
+  ['KC_LSFT','KC_Z','KC_X','KC_C','KC_V','KC_B','KC_N','KC_M','KC_COMM','KC_DOT','KC_SLSH','KC_RSFT','KC_UP','KC_P1','KC_P2','KC_P3','KC_PENT'],
+  ['KC_LCTL','KC_LGUI','KC_LALT','KC_SPC','KC_RALT','MO(3)','KC_LEFT','KC_DOWN','KC_RGHT','KC_P0','KC_PDOT'],
+];
+
+const DEMO_ALIASES: Record<string, string> = {
+  KC_BRMD: 'KC_BRID', KC_BRMU: 'KC_BRIU', KC_SCRL: 'KC_SLCK', KC_PAUSE: 'KC_PAUS',
+  KC_NUM: 'KC_NLCK', KC_RIGHT: 'KC_RGHT', KC_LWIN: 'KC_LGUI', KC_RWIN: 'KC_RGUI',
+  KC_LOPT: 'KC_LALT', KC_LCMD: 'KC_LGUI', KC_RCMD: 'KC_RGUI',
+};
+
+const DEMO_CUSTOM_VALUES: Record<string, number> = {
+  RF_DFU: 0x7e00, LNK_USB: 0x7e01, LNK_RF: 0x7e02, LNK_BLE1: 0x7e03, LNK_BLE2: 0x7e04, LNK_BLE3: 0x7e05,
+  MAC_TASK: 0x7e06, MAC_SEARCH: 0x7e07, MAC_VOICE: 0x7e08, MAC_DND: 0x7e0a,
+  WIN_PRTA: 0x7e0b, MAC_PRTA: 0x7e0c, DEV_RESET: 0x7e0d, SLEEP_MODE: 0x7e0e, BAT_SHOW: 0x7e0f,
+};
+
+const demoKeycodeToByte = (() => {
+  const dict = getBasicKeyDict(12, 13);
+  return (code: string): number => {
+    if (code === '_______') return 0;
+    if (DEMO_CUSTOM_VALUES[code] !== undefined) return DEMO_CUSTOM_VALUES[code];
+    const normalized = DEMO_ALIASES[code] ?? code;
+    try {
+      return getByteForCode(normalized, dict);
+    } catch {
+      return 0;
+    }
+  };
+})();
+
+const applyOrderedDemoLayout = (
+  keymap: number[][],
+  layer: number,
+  layout: DemoLayout,
+  keys: KLEKey[],
+  cols: number,
+) => {
+  const ordered = layout.flat();
+  if (ordered.length !== keys.length) {
+    console.warn(`[demo-keymap] layout/key count mismatch: ${ordered.length} vs ${keys.length}`);
+  }
+  ordered.forEach((code, index) => {
+    const key = keys[index];
+    if (!key || !keymap[layer]) return;
+    keymap[layer][key.row * cols + key.col] = demoKeycodeToByte(code);
+  });
+};
+
+const buildDemoKeymap = (
+  rows: number,
+  cols: number,
+  layerCount: number,
+  keys: KLEKey[],
+  modelId: string,
+): number[][] => {
   const keymap: number[][] = [];
   for (let l = 0; l < layerCount; l++) {
     keymap.push(new Array(rows * cols).fill(0x00));
   }
-  // 第 0 层使用 NuPhy 页面相同的 Halo65 默认层，保证演示页和真实设备的
-  // 键帽文字/位置都可直接做像素对照。
+  if (modelId === 'halo75-v2' || modelId === 'halo96-v2') {
+    const mac = modelId === 'halo75-v2' ? HALO75_MAC : HALO96_MAC;
+    const windows = modelId === 'halo75-v2' ? HALO75_WIN : HALO96_WIN;
+    applyOrderedDemoLayout(keymap, 0, mac, keys, cols);
+    // 页面将 0–2 作为 Mac 层、3–5 作为 Windows 层；6–7 是固件保留层，
+    // 不在页面中展示。把 QMK 的 Windows 基础层放到 Windows 组的首层。
+    if (layerCount > 3) applyOrderedDemoLayout(keymap, 3, windows, keys, cols);
+    return keymap;
+  }
+
+  // Halo65 保留现有官方 JSON 对应的演示矩阵。
   const demoRows: Record<number, Array<[number, number]>> = {
     0: [[0,0x29],[1,0x1e],[2,0x1f],[3,0x20],[4,0x21],[5,0x22],[6,0x23],[7,0x24],[8,0x25],[9,0x26],[10,0x27],[11,0x2d],[12,0x2e],[13,0x2a],[15,0x4c]],
     1: [[0,0x2b],[1,0x14],[2,0x1a],[3,0x08],[4,0x15],[5,0x17],[6,0x1c],[7,0x18],[8,0x0c],[9,0x12],[10,0x13],[11,0x2f],[12,0x30],[13,0x31],[15,0x4a]],
@@ -118,7 +216,7 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
       const keys = parseKLE(definition.layouts.keymap);
       const layerCount = model.layerCount;
       const {rows, cols} = definition.matrix;
-      const keymap = buildDemoKeymap(rows, cols, layerCount);
+      const keymap = buildDemoKeymap(rows, cols, layerCount, keys, model.id);
       set({
         definition,
         keys,
@@ -213,7 +311,7 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
   },
 
   setProfile: (profile) => {
-    set({profile, currentLayer: profile === 'windows' ? 4 : 0});
+    set({profile, currentLayer: profile === 'windows' ? 3 : 0});
   },
 
   readKeymap: async (layer) => {

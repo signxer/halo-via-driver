@@ -147,15 +147,16 @@ export const PressKeyPage: React.FC = () => {
         customKeycodes={definition?.customKeycodes}
         selectedPos={selected}
         onKeyClick={handleKeyClick}
+        hostProfile={profile}
       />
 
       {/* 原版 myToolBac:重置 + FN 层切换器 */}
       <Toolbar>
         <ResetBtn onClick={() => resetLayer(currentLayer)} title="重置当前层"><svg viewBox="0 0 24 24"><use href={`${navSprite}#reset`} /></svg>重置</ResetBtn>
         <LayerSwitcher
-          layerCount={Math.min(Math.max(layerCount - (profile === 'windows' ? 4 : 0), 0), 4)}
+          layerCount={Math.min(Math.max(layerCount - 3, 0), 3)}
           current={currentLayer}
-          layerOffset={profile === 'windows' ? 4 : 0}
+          layerOffset={profile === 'windows' ? 3 : 0}
           onChange={setLayer}
         />
       </Toolbar>
@@ -173,6 +174,7 @@ export const PressKeyPage: React.FC = () => {
         >
           <KeycodePicker
             customKeycodes={definition?.customKeycodes}
+            hostProfile={profile}
             currentValue={currentValue}
             onSelect={handleSelect}
           />

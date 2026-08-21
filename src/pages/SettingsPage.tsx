@@ -191,14 +191,14 @@ export const SettingsPage: React.FC = () => {
             <Row>
               <div>
                 <h4>切换语言</h4>
-                <p>切换 NuPhyIO 显示语言。</p>
+                <p>切换 NuPhyVIA 显示语言。</p>
               </div>
               <Pill disabled>简体中文⌄</Pill>
             </Row>
             <Row>
               <div>
                 <h4>主题切换</h4>
-                <p>切换 NuPhyIO 显示主题，支持亮色、暗色两种模式。</p>
+                <p>切换 NuPhyVIA 显示主题，支持亮色、暗色两种模式。</p>
               </div>
               <Pill onClick={toggleTheme}>{theme === 'dark' ? '暗色模式⌄' : '亮色模式⌄'}</Pill>
             </Row>

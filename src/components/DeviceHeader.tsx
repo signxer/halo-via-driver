@@ -64,6 +64,7 @@ export const DeviceHeader: React.FC<DeviceHeaderProps> = ({showControls = true})
         customKeycodes={definition?.customKeycodes}
         selectedPos={null}
         onKeyClick={() => undefined}
+        hostProfile={profile}
         lightingPreview={location.pathname === '/light'}
       />
       {showControls && (
@@ -72,9 +73,9 @@ export const DeviceHeader: React.FC<DeviceHeaderProps> = ({showControls = true})
             <svg viewBox="0 0 24 24"><use href={`${navSprite}#reset`} /></svg>重置
           </ResetButton>
           <LayerSwitcher
-            layerCount={Math.min(Math.max(layerCount - (profile === 'windows' ? 4 : 0), 0), 4)}
+            layerCount={Math.min(Math.max(layerCount - 3, 0), 3)}
             current={currentLayer}
-            layerOffset={profile === 'windows' ? 4 : 0}
+            layerOffset={profile === 'windows' ? 3 : 0}
             onChange={setLayer}
           />
         </Toolbar>
