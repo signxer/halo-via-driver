@@ -66,8 +66,61 @@ const SPECIAL_KEYCODE_TIPS: Record<string, string> = {
   KC_NO: '空白按键：按下后不产生任何效果',
 };
 
+const LIGHTING_KEYCODE_TIPS: Record<string, string> = {
+  BL_TOGG: '切换键盘背光灯的开启和关闭',
+  BL_ON: '打开键盘背光灯',
+  BL_OFF: '关闭键盘背光灯',
+  BL_DEC: '降低键盘背光灯亮度',
+  BL_INC: '提高键盘背光灯亮度',
+  BL_STEP: '切换键盘背光灯模式',
+  BL_BRTG: '切换键盘背光灯亮度档位',
+  RGB_TOG: '切换 RGB 灯效的开启和关闭',
+  RGB_MOD: '切换到下一个 RGB 灯效',
+  RGB_RMOD: '切换到上一个 RGB 灯效',
+  RGB_HUI: '增加 RGB 灯效的色相，改变颜色在色环上的位置',
+  RGB_HUD: '降低 RGB 灯效的色相，改变颜色在色环上的位置',
+  RGB_SAI: '增加 RGB 灯效的饱和度，让颜色更加鲜艳',
+  RGB_SAD: '降低 RGB 灯效的饱和度，让颜色更加柔和并接近白色',
+  RGB_VAI: '提高 RGB 灯效亮度',
+  RGB_VAD: '降低 RGB 灯效亮度',
+  RGB_SPI: '加快 RGB 灯效变化速度',
+  RGB_SPD: '减慢 RGB 灯效变化速度',
+  RGB_M_P: '纯色常亮：使用当前颜色持续点亮，不产生动态变化',
+  RGB_M_B: '呼吸灯：当前颜色按照明暗周期渐亮、渐暗',
+  RGB_M_R: '彩虹：按照色相连续变化显示彩色渐变效果',
+  RGB_M_SW: '旋涡：颜色沿键盘区域旋转流动',
+  RGB_M_SN: '蛇形：彩色光带沿键盘区域移动',
+  RGB_M_K: '骑士：光带从中心向两侧或从两侧向中心移动',
+  RGB_M_X: '圣诞：使用红色和绿色交替显示节日灯效',
+  RGB_M_G: '渐变：在相邻颜色之间平滑过渡',
+  RGB_MODE_RGBTEST: 'RGB 灯效测试模式：循环检查灯珠颜色显示',
+  UG_TOGG: '切换底部灯带的开启和关闭',
+  UG_NEXT: '切换到底部灯带的下一个灯效',
+  UG_PREV: '切换到底部灯带的上一个灯效',
+  UG_HUEU: '增加底部灯带色相，改变颜色在色环上的位置',
+  UG_HUED: '降低底部灯带色相，改变颜色在色环上的位置',
+  UG_SATU: '增加底部灯带饱和度，让颜色更加鲜艳',
+  UG_SATD: '降低底部灯带饱和度，让颜色更加柔和并接近白色',
+  UG_VALU: '提高底部灯带亮度',
+  UG_VALD: '降低底部灯带亮度',
+  UG_SPDU: '加快底部灯带灯效变化速度',
+  UG_SPDD: '减慢底部灯带灯效变化速度',
+  RM_TOGG: '切换 RGB 矩阵灯效的开启和关闭',
+  RM_NEXT: '切换到 RGB 矩阵的下一个灯效',
+  RM_PREV: '切换到 RGB 矩阵的上一个灯效',
+  RM_HUEU: '增加 RGB 矩阵色相，改变颜色在色环上的位置',
+  RM_HUED: '降低 RGB 矩阵色相，改变颜色在色环上的位置',
+  RM_SATU: '增加 RGB 矩阵饱和度，让颜色更加鲜艳',
+  RM_SATD: '降低 RGB 矩阵饱和度，让颜色更加柔和并接近白色',
+  RM_VALU: '提高 RGB 矩阵亮度',
+  RM_VALD: '降低 RGB 矩阵亮度',
+  RM_SPDU: '加快 RGB 矩阵灯效变化速度',
+  RM_SPDD: '减慢 RGB 矩阵灯效变化速度',
+};
+
 function specialKeycodeTip(code: string): string | undefined {
   if (SPECIAL_KEYCODE_TIPS[code]) return SPECIAL_KEYCODE_TIPS[code];
+  if (LIGHTING_KEYCODE_TIPS[code]) return LIGHTING_KEYCODE_TIPS[code];
 
   const layer = code.match(/^(MO|TO|TG|TT|OSL|DF)\((\d+)\)$/);
   if (layer) {

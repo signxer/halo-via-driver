@@ -58,13 +58,19 @@ const KEY_ICONS: Record<string, string> = {
   KC_MS_WH_DOWN: 'specialKeys_keyIcon6', KC_MS_WH_LEFT: 'KcMsWhLeft',
   KC_MS_WH_RIGHT: 'KcMsWhRight',
   KC_MCTL: 'missioncontrol', KC_LPAD: 'launchpad',
-  BL_TOGG: 'lightKeys_keyIcon21', RGB_TOG: 'lightKeys_keyIcon21', UG_TOGG: 'lightKeys_keyIcon21', RM_TOGG: 'lightKeys_keyIcon21',
+  BL_TOGG: 'lightKeys_keyIcon21', BL_ON: 'lightKeys_keyIcon21', BL_OFF: 'lightKeys_keyIcon21', BL_BRTG: 'lightKeys_keyIcon21',
+  RGB_TOG: 'lightKeys_keyIcon21', UG_TOGG: 'lightKeys_keyIcon21', RM_TOGG: 'lightKeys_keyIcon21',
   BL_DEC: 'lightKeys_keyIcon4', RGB_VAD: 'lightKeys_keyIcon4', UG_VALD: 'lightKeys_keyIcon4', RM_VALD: 'lightKeys_keyIcon4',
   BL_INC: 'lightKeys_keyIcon3', RGB_VAI: 'lightKeys_keyIcon3', UG_VALU: 'lightKeys_keyIcon3', RM_VALU: 'lightKeys_keyIcon3',
   BL_STEP: 'lightKeys_keyIcon22', RGB_RMOD: 'lightKeys_keyIcon22', RGB_MOD: 'lightKeys_keyIcon22', UG_NEXT: 'lightKeys_keyIcon22', UG_PREV: 'lightKeys_keyIcon22', RM_NEXT: 'lightKeys_keyIcon22', RM_PREV: 'lightKeys_keyIcon22',
   RGB_SPD: 'lightKeys_keyIcon7', UG_SPDD: 'lightKeys_keyIcon7', RM_SPDD: 'lightKeys_keyIcon7',
   RGB_SPI: 'lightKeys_keyIcon8', UG_SPDU: 'lightKeys_keyIcon8', RM_SPDU: 'lightKeys_keyIcon8',
   RGB_HUD: 'lightKeys_keyIcon4', RGB_SAD: 'lightKeys_keyIcon4', RGB_HUI: 'lightKeys_keyIcon3', RGB_SAI: 'lightKeys_keyIcon3',
+  UG_HUED: 'lightKeys_keyIcon4', UG_SATD: 'lightKeys_keyIcon4', UG_HUEU: 'lightKeys_keyIcon3', UG_SATU: 'lightKeys_keyIcon3',
+  RM_HUED: 'lightKeys_keyIcon4', RM_SATD: 'lightKeys_keyIcon4', RM_HUEU: 'lightKeys_keyIcon3', RM_SATU: 'lightKeys_keyIcon3',
+  RGB_M_P: 'lightKeys_keyIcon22', RGB_M_B: 'lightKeys_keyIcon22', RGB_M_R: 'lightKeys_keyIcon22',
+  RGB_M_SW: 'lightKeys_keyIcon22', RGB_M_SN: 'lightKeys_keyIcon22', RGB_M_K: 'lightKeys_keyIcon22',
+  RGB_M_X: 'lightKeys_keyIcon22', RGB_M_G: 'lightKeys_keyIcon22', RGB_MODE_RGBTEST: 'lightKeys_keyIcon22',
 };
 
 const CUSTOM_KEY_ICONS: Record<string, string> = {
@@ -78,11 +84,11 @@ const CUSTOM_KEY_ICONS: Record<string, string> = {
 };
 
 const KEY_SPRITE_ICONS = new Set([
-  // 多媒体、鼠标和灯效图标均来自原版 key-symbols.svg；不能误用导航
-  // symbol，否则 <use> 找不到目标时只会留下空白按键。
-  ...Array.from({length: 20}, (_, i) => `mediaKeys_keyIcon${i}`),
-  'lightKeys_keyIcon3', 'lightKeys_keyIcon4', 'lightKeys_keyIcon7',
-  'lightKeys_keyIcon8', 'lightKeys_keyIcon21', 'lightKeys_keyIcon22',
+  // 这里只登记 key-symbols.svg 中实际存在的 symbol。其余多媒体和
+  // 灯效图标在原版 nav-symbols.svg 中，误放到这里会导致 <use> 空白。
+  'mediaKeys_keyIcon0', 'mediaKeys_keyIcon10', 'mediaKeys_keyIcon11',
+  'mediaKeys_keyIcon12', 'mediaKeys_keyIcon13', 'mediaKeys_keyIcon14',
+  'mediaKeys_keyIcon15', 'mediaKeys_keyIcon16', 'mediaKeys_keyIcon17',
   'EjectKeyIcon', 'KcMsWhLeft', 'KcMsWhRight',
   'specialKeys_keyIcon0', 'specialKeys_keyIcon1', 'specialKeys_keyIcon2',
   'specialKeys_keyIcon4', 'specialKeys_keyIcon5', 'specialKeys_keyIcon6',
