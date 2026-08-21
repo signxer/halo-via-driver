@@ -31,10 +31,103 @@ const ORIGINAL_KEYCODE_ALIAS: Record<string, string> = {
   KC_RGHT: 'KC_RIGHT',
 };
 
+// VIA 的特殊键码和 NuPhy 的自定义键码经常只有英文 title，原版会在
+// tooltip 中给出可读的说明。这里保留键码本身用于搜索/识别，但把用户
+// 看到的说明统一转换成中文，避免面板里出现一组难以理解的英文缩写。
+const CUSTOM_KEYCODE_TIPS: Record<string, string> = {
+  'RF DFU': '进入 2.4G 无线固件升级模式',
+  'Link USB': '切换到 USB 有线连接模式',
+  'Link RF': '切换到 2.4G 无线连接模式',
+  LinkBLE_1: '切换到蓝牙 1 连接模式',
+  LinkBLE_2: '切换到蓝牙 2 连接模式',
+  LinkBLE_3: '切换到蓝牙 3 连接模式',
+  'Mac Task': '打开 macOS 调度中心，查看并切换正在运行的窗口',
+  'Mac Search': '打开 macOS 系统搜索',
+  'Mac Siri Voice': '打开语音输入或唤起 Siri',
+  'Mac Console': '打开 macOS 控制台',
+  'Mac Dnt': '切换 macOS 勿扰模式',
+  PrintWhole: '截取整个屏幕',
+  PrintArea: '截取屏幕选定区域',
+  'Device Reset': '重启键盘设备',
+  'Auto Sleep': '切换自动休眠模式',
+  'Battery Show': '显示当前电池电量',
+  'Side Light +': '提高条型灯亮度',
+  'Side Light -': '降低条型灯亮度',
+  'Side Next Mode': '切换到下一个条型灯效果',
+  'Side Next Color': '切换到下一种条型灯颜色',
+  'Side Speed +': '加快条型灯效果速度',
+  'Side Speed -': '减慢条型灯效果速度',
+  'Code Mode': '切换到代码模式',
+  'Paint Mode': '切换到绘图模式',
+};
+
+const SPECIAL_KEYCODE_TIPS: Record<string, string> = {
+  KC_TRNS: '透明键：当前层没有定义功能时，继续使用下一层对应位置的按键功能',
+  KC_NO: '空白按键：按下后不产生任何效果',
+};
+
+function specialKeycodeTip(code: string): string | undefined {
+  if (SPECIAL_KEYCODE_TIPS[code]) return SPECIAL_KEYCODE_TIPS[code];
+
+  const layer = code.match(/^(MO|TO|TG|TT|OSL|DF)\((\d+)\)$/);
+  if (layer) {
+    const [, type, value] = layer;
+    const layerNumber = Number(value) + 1;
+    const descriptions: Record<string, string> = {
+      MO: `按住时临时切换到第 ${layerNumber} 层，松开后恢复原层`,
+      TO: `切换到第 ${layerNumber} 层，并将它设为当前工作层`,
+      TG: `切换第 ${layerNumber} 层的启用状态`,
+      TT: `按住时临时切换到第 ${layerNumber} 层，快速点按可切换该层开关`,
+      OSL: `单次切换到第 ${layerNumber} 层，完成一次按键后自动返回`,
+      DF: `将默认工作层切换到第 ${layerNumber} 层`,
+    };
+    return descriptions[type];
+  }
+
+  if (/^LT\(/.test(code)) return '轻触执行普通按键功能，按住时临时切换到指定层';
+  if (/^MT\(/.test(code)) return '轻触执行普通按键功能，按住时执行修饰键功能';
+  if (/^LM\(/.test(code)) return '按住时同时执行指定层和修饰键功能';
+  if (/^OSM\(/.test(code)) return '单次启用指定修饰键，下一次按键完成后自动取消';
+  if (/^MACRO(?:\(|\s)/i.test(code)) {
+    const number = code.match(/(?:\(|\s)(\d+)/)?.[1];
+    return `触发宏${number ? ` ${Number(number) + 1}` : ''}，执行已保存的宏按键序列`;
+  }
+
+  const lightingTips: Array<[RegExp, string]> = [
+    [/^(?:RGB_|RM_|UG_).*TOGG/, '切换灯效开关'],
+    [/^(?:RGB_|RM_|UG_).*RMOD/, '切换到上一个灯效'],
+    [/^(?:RGB_|RM_|UG_).*MOD/, '切换到下一个灯效'],
+    [/^(?:RGB_|RM_|UG_).*(?:VAI|VALU)|^(?:BL|BR)_INC/, '增加灯效亮度'],
+    [/^(?:RGB_|RM_|UG_).*(?:VAD|VALD)|^(?:BL|BR)_DEC/, '降低灯效亮度'],
+    [/^(?:RGB_|RM_|UG_).*HUI/, '增加灯效色相'],
+    [/^(?:RGB_|RM_|UG_).*HUD/, '降低灯效色相'],
+    [/^(?:RGB_|RM_|UG_).*SAI/, '增加灯效饱和度'],
+    [/^(?:RGB_|RM_|UG_).*SAD/, '降低灯效饱和度'],
+    [/^(?:RGB_|RM_|UG_).*SPI|^BR_UP/, '加快灯效变化速度'],
+    [/^(?:RGB_|RM_|UG_).*SPD|^BR_DOWN/, '减慢灯效变化速度'],
+    [/^BL_/, '调节键盘背光灯'],
+  ];
+  for (const [pattern, tip] of lightingTips) {
+    if (pattern.test(code)) return tip;
+  }
+  return undefined;
+}
+
+function chineseFallback(code: string, fallback: string): string {
+  const text = fallback.replace(/\n/g, ' ').trim();
+  if (CUSTOM_KEYCODE_TIPS[text]) return CUSTOM_KEYCODE_TIPS[text];
+  const special = specialKeycodeTip(code);
+  if (special) return special;
+  if (text && /[\u4e00-\u9fff]/.test(text)) return text;
+  if (text) return `执行“${text}”对应的键盘功能（键码：${code}）`;
+  return `键盘功能：${code}`;
+}
+
 export function keycodeExplanation(code: string, fallback = ''): string {
   const canonical = ORIGINAL_KEYCODE_ALIAS[code] ?? code;
-  return KEY_CODE_TIPS[canonical] ?? KEY_CODE_NAMES[canonical] ??
-    KEY_CODE_TIPS[code] ?? KEY_CODE_NAMES[code] ?? fallback;
+  const translated = KEY_CODE_TIPS[canonical] ?? KEY_CODE_NAMES[canonical] ??
+    KEY_CODE_TIPS[code] ?? KEY_CODE_NAMES[code];
+  return translated ?? chineseFallback(code, fallback);
 }
 
 // 灯效中文名映射(ColorPage)

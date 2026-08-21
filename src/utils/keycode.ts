@@ -50,7 +50,7 @@ export function getKeycodeExplanation(keycode: number, custom: CustomKeycode[] =
   if (keycode >= CUSTOM_KEYCODE_START) {
     const idx = keycode - CUSTOM_KEYCODE_START;
     const c = custom[idx];
-    return c?.title ?? c?.name.replace(/\n/g, ' ') ?? `自定义键码 ${idx + 1}`;
+    return keycodeExplanation(`CUSTOM(${idx})`, c?.title ?? c?.name.replace(/\n/g, ' ') ?? `自定义键码 ${idx + 1}`);
   }
   const code = getCodeForByte(keycode, basicDict, byteToKey);
   return keycodeExplanation(code ?? '', keycodeLabel(keycode, custom));

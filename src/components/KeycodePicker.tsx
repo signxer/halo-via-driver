@@ -78,9 +78,11 @@ const CUSTOM_KEY_ICONS: Record<string, string> = {
 };
 
 const KEY_SPRITE_ICONS = new Set([
-  'mediaKeys_keyIcon0', 'mediaKeys_keyIcon10', 'mediaKeys_keyIcon11',
-  'mediaKeys_keyIcon12', 'mediaKeys_keyIcon13', 'mediaKeys_keyIcon14',
-  'mediaKeys_keyIcon15', 'mediaKeys_keyIcon16', 'mediaKeys_keyIcon17',
+  // 多媒体、鼠标和灯效图标均来自原版 key-symbols.svg；不能误用导航
+  // symbol，否则 <use> 找不到目标时只会留下空白按键。
+  ...Array.from({length: 20}, (_, i) => `mediaKeys_keyIcon${i}`),
+  'lightKeys_keyIcon3', 'lightKeys_keyIcon4', 'lightKeys_keyIcon7',
+  'lightKeys_keyIcon8', 'lightKeys_keyIcon21', 'lightKeys_keyIcon22',
   'EjectKeyIcon', 'KcMsWhLeft', 'KcMsWhRight',
   'specialKeys_keyIcon0', 'specialKeys_keyIcon1', 'specialKeys_keyIcon2',
   'specialKeys_keyIcon4', 'specialKeys_keyIcon5', 'specialKeys_keyIcon6',
@@ -160,9 +162,62 @@ const NavBtnIcon = styled.div`
     min-width: 1.25rem;
     fill: currentColor;
     color: inherit;
-    stroke: none;
+    &.macro-icon { fill: none; }
   }
 `;
+
+// 宏图标是原版导航里的“圆角矩形 + M”线性图标。单独内联渲染，避免
+// 外部 symbol 的 stroke 被宿主 SVG 覆盖后退化成一块黑色填充。
+const MacroIcon: React.FC<{className?: string}> = ({className}) => (
+  <svg className={`macro-icon${className ? ` ${className}` : ''}`} viewBox="0 0 24 24" aria-hidden="true" fill="none">
+    <rect x="2.5" y="4.25" width="19" height="15.5" rx="4" stroke="currentColor" strokeWidth="1.5" />
+    <path
+      fill="currentColor"
+      d="M6.5 15V9h1.4l1.6 2.7L11.1 9h1.4v6h-1.35v-3.35l-1.12 2.04H8.95l-1.1-2.04V15H6.5Zm7.55 0V9h1.4v6h-1.4Z"
+    />
+  </svg>
+);
+
+const KeycodeGlyph = styled.svg.attrs({viewBox: '0 0 24 24', 'aria-hidden': true})`
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  .glyph-fill { fill: currentColor; stroke: none; }
+`;
+
+function renderKeycodeGlyph(code: string): React.ReactNode {
+  if (/^MACRO/i.test(code)) return <MacroIcon />;
+  if (code === 'KC_NO') {
+    return (
+      <KeycodeGlyph>
+        <rect x="3" y="3" width="18" height="18" rx="4" />
+        <path d="m7 7 10 10M17 7 7 17" />
+      </KeycodeGlyph>
+    );
+  }
+  if (code === 'KC_TRNS') {
+    return (
+      <KeycodeGlyph>
+        <rect x="3" y="3" width="18" height="18" rx="4" />
+        <path d="M7 12h10M13 8l4 4-4 4" />
+      </KeycodeGlyph>
+    );
+  }
+  if (/^(MO|LT|TO|TG|TT|OSL|DF|MT|LM|OSM)\(/.test(code)) {
+    return (
+      <KeycodeGlyph>
+        <rect x="3" y="3" width="18" height="18" rx="4" />
+        <path d="M7 15V9h1.4l1.6 2.45L11.6 9H13v6M15 9v6" />
+      </KeycodeGlyph>
+    );
+  }
+  return null;
+}
 
 const NavBtnName = styled.span<{$active: boolean}>`
   display: block;
@@ -351,6 +406,7 @@ const KeyBtn = styled.button<{
     width: 1.75rem;
     height: 1.75rem;
     fill: currentColor;
+    &.macro-icon { fill: none; }
   }
 `;
 
@@ -387,17 +443,20 @@ const TooltipCard = styled.div<{$visible: boolean}>`
 
   .tooltip-content {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.5rem;
     padding: 0.5rem;
     font-weight: 700;
-    line-height: 1.15;
-    white-space: nowrap;
+    line-height: 1.45;
+    white-space: normal;
+    text-align: left;
+    overflow-wrap: anywhere;
   }
 
   .tooltip-content > span {
     color: var(--text-black-l-title);
     font-size: 0.75rem;
+    max-width: 22rem;
   }
 
   .tooltip-bottom,
@@ -693,6 +752,7 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
     const label = KEY_LABELS[k.code] ?? k.shortName ?? k.name.split('\n')[0];
     const explanation = keycodeExplanation(k.code, k.title ?? k.name);
     const iconSprite = KEY_SPRITE_ICONS.has(icon ?? '') ? keySprite : navSprite;
+    const fallbackGlyph = renderKeycodeGlyph(k.code);
     return (
       <KeyTooltip
         key={`${k.code}-${i}`}
@@ -705,7 +765,7 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
         y={geometry?.y}
         onClick={() => onSelect(val)}
       >
-        {icon ? <svg aria-hidden="true"><use href={`${iconSprite}#${icon}`} /></svg> : <KeyLabel>{label}</KeyLabel>}
+        {icon ? <svg aria-hidden="true"><use href={`${iconSprite}#${icon}`} /></svg> : fallbackGlyph ?? <KeyLabel>{label}</KeyLabel>}
       </KeyTooltip>
     );
   };
@@ -721,9 +781,11 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
             title={CATEGORY_LABELS[g.id] ?? g.label}
           >
             <NavBtnIcon>
-              <svg>
-                <use href={`${navSprite}#${CATEGORY_ICONS[g.id] ?? 'SpecialCharacters'}`} />
-              </svg>
+              {g.id === 'macro' ? <MacroIcon /> : (
+                <svg>
+                  <use href={`${navSprite}#${CATEGORY_ICONS[g.id] ?? 'SpecialCharacters'}`} />
+                </svg>
+              )}
             </NavBtnIcon>
             <NavBtnContent>
               <NavBtnName $active={g.id === activeTab}>
