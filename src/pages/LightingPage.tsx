@@ -909,13 +909,24 @@ export const LightingPage: React.FC = () => {
     const next = !customColorEnabled;
     setCustomColorEnabled(next);
     if (next) {
-      // 开启时重新写入当前颜色；关闭时只重新应用当前效果，让固件回到效果自身的颜色逻辑。
+      // 开启时重新写入当前颜色。
       if (colorItem) {
         const {h, s} = hexToHsv(color);
         void write(colorItem, degToHue(h), s);
       }
+      if (effectItem) void write(effectItem, effectValue);
+      return;
     }
-    if (effectItem) void write(effectItem, effectValue);
+
+    // VIA JSON 只有 Color(H/S) 菜单，没有“自定义颜色启用”这个固件字段。
+    // 因此关闭开关不能只重写 Effect：固件仍会沿用刚才写入的饱和度，
+    // 当用户之前选过白色/低饱和色时，彩虹类效果就会退化成单色。
+    // 用 QMK RGB Matrix 的全饱和基准色清掉这个覆盖值，再重新应用当前效果，
+    // 让效果自身重新接管色相变化；这里不改 UI 中保存的自定义色，重新开启时可恢复。
+    void (async () => {
+      if (colorItem) await write(colorItem, 0, 255);
+      if (effectItem) await write(effectItem, effectValue);
+    })();
   };
 
   const pickColorSquare = (event: React.PointerEvent<HTMLDivElement>) => {
