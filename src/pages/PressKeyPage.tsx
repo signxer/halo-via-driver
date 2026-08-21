@@ -21,8 +21,8 @@ import {useLocation} from 'react-router-dom';
 const TabArea = styled.div`
   position: fixed;
   z-index: 11;
-  left: 1.9rem;
-  right: 1.9rem;
+  left: 2.05rem;
+  right: 2.05rem;
   bottom: 23.25rem;
   display: flex;
   flex-direction: column;
@@ -35,8 +35,8 @@ const TabArea = styled.div`
 const PanelArea = styled(TabArea)`
   position: fixed;
   z-index: 10;
-  left: 1.9rem;
-  right: 1.9rem;
+  left: 2.05rem;
+  right: 2.05rem;
   bottom: 0.5rem;
   width: auto;
   height: 23.25rem;
@@ -72,11 +72,11 @@ const ResetBtn = styled.button`
   width: 3.6rem;
   justify-content: center;
   border-radius: 0.375rem;
-  background: var(--white-100);
+  background: var(--button-inactive-background);
   box-shadow: 0 1px 4px var(--black-4);
   transition: background 0.15s;
   &:hover {
-    background: var(--black-4);
+    background: var(--surface-hover);
   }
   svg {
     width: 0.875rem;

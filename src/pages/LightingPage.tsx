@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import styled from 'styled-components';
 import {NavTabs} from '../components/NavTabs';
 import {DeviceHeader} from '../components/DeviceHeader';
@@ -8,8 +8,6 @@ import {parseLightingMenus, findItem} from '../utils/lighting';
 import type {LightingZone} from '../utils/lighting';
 import keyMatrixLight from '../assets/nuphy/light/key-matrix-light.webp';
 import keyMatrixLightCheck from '../assets/nuphy/light/key-matrix-light-check.webp';
-import stripLight from '../assets/nuphy/light/strip-light.webp';
-import stripLightCheck from '../assets/nuphy/light/strip-light-check.webp';
 import lightSprite from '../assets/nuphy/icons/light-symbols.svg?url';
 
 // ============================================================
@@ -28,51 +26,60 @@ const Page = styled.div`
 const PageNav = styled.div`
   position: fixed;
   z-index: 11;
-  left: 1.9rem;
-  right: 1.9rem;
+  left: 2.05rem;
+  right: 2.05rem;
   bottom: 23.25rem;
   height: 1.875rem;
 `;
 
 const Card = styled.div`
   position: fixed;
-  left: 1.9rem;
-  right: 1.9rem;
+  left: 2.05rem;
+  right: 2.05rem;
   bottom: 0.5rem;
   background: var(--surface-page);
-  border-radius: 1rem;
-  padding: 1rem;
+  border-radius: 1.5rem;
+  padding: .5rem;
   box-shadow: 0 2px 8px var(--black-4);
-  display: grid;
-  grid-template-columns: 16.25rem 19.625rem 19.625rem minmax(30rem, 1fr);
-  gap: 1rem;
+  display: flex;
+  gap: .5rem;
   height: 23.25rem;
+  box-sizing: border-box;
   overflow: hidden;
 `;
 
 // === 分区 tab(原版 lightTypeItem) ===
 const ZoneTabs = styled.div`
   display: flex;
+  flex: 0 0 17.3125rem;
   flex-direction: column;
   gap: .5rem;
-  margin: 0;
-  grid-row: span 5;
+  box-sizing: border-box;
+  padding: .5rem;
+  background: var(--surface-card);
+  border-radius: 1rem;
 `;
 
-const ZoneTab = styled.button<{$active: boolean}>`
+const ZoneTab = styled.button<{$active: boolean; $disabled?: boolean}>`
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: .5rem;
   justify-content: center;
-  height: 9.8125rem;
-  min-height: 9.8125rem;
+  width: 100%;
+  flex: 0 0 9.8125rem;
+  min-height: 0;
   padding: .5rem;
+  box-sizing: border-box;
   border-radius: .75rem;
   background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
   border: 0;
   transition: all 0.15s ease;
-  cursor: pointer;
+  cursor: ${(p) => (p.$disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${(p) => (p.$disabled ? .52 : 1)};
+  &:hover {
+    background: ${(p) => (p.$disabled ? 'transparent' : p.$active ? 'var(--button-active-background)' : 'var(--button-black-xs-min)')};
+  }
   img {
     width: 100%;
     height: 6.125rem;
@@ -136,39 +143,63 @@ const ZoneSwitch = styled.span<{$on: boolean}>`
 `;
 
 const SectionHeader = styled.div`
+  height: 1.23rem;
+  flex: 0 1 auto;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-black-l-title);
-  padding: .25rem 0 .5rem;
-  grid-column: 2;
-  grid-row: 1;
+  padding: 0;
+`;
+
+const MiddlePanel = styled.div`
+  display: flex;
+  flex: 0 0 40.3125rem;
+  min-width: 0;
+  flex-direction: column;
+  gap: .5rem;
+  box-sizing: border-box;
+  padding: .25rem .5rem .5rem;
+  background: var(--surface-card);
+  border-radius: 1rem;
+`;
+
+const MiddleControls = styled.div`
+  display: flex;
+  flex: 1 0 0;
+  min-height: 0;
+  gap: .5rem;
 `;
 
 // === 效果宫格(原版 lightTypeItem 网格) ===
 const EffectGrid = styled.div`
+  flex: 0 0 19.25rem;
+  width: 19.25rem;
+  height: 100%;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: .25rem;
-  background: var(--surface-card);
+  grid-auto-rows: 3.5rem;
+  gap: .5rem;
+  background: var(--surface-quiet);
   border-radius: .75rem;
   padding: .5rem;
   align-content: start;
-  position: relative;
-  top: -.875rem;
-  grid-column: 2;
-  grid-row: 2 / span 4;
+  overflow-y: auto;
 `;
 
 const EffectItem = styled.button<{$active: boolean}>`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: .25rem;
-  padding: .5rem .125rem;
-  height: 3.5rem;
-  border-radius: var(--border-radius-s);
+  width: 100%;
+  height: 100%;
+  padding: .125rem;
+  box-sizing: border-box;
+  border-radius: .375rem;
   background: ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
-  border: 1px solid ${(p) => (p.$active ? 'var(--button-active-background)' : 'transparent')};
+  border: 0;
   transition: all 0.1s ease;
   cursor: pointer;
   color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
@@ -178,8 +209,8 @@ const EffectItem = styled.button<{$active: boolean}>`
 `;
 
 const EffectDot = styled.span<{$active: boolean}>`
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
   display: block;
   color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
   opacity: ${(p) => (p.$active ? 1 : .72)};
@@ -187,7 +218,7 @@ const EffectDot = styled.span<{$active: boolean}>`
 `;
 
 const EffectName = styled.span<{$active: boolean}>`
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: ${(p) => (p.$active ? 'var(--button-active-text)' : 'var(--text-primary)')};
   text-align: center;
@@ -218,12 +249,21 @@ const GlobalLightToggle = styled.span<{$on: boolean}>`
 `;
 
 // === 原版 lightConfigSettingCard 滑块 ===
-const SliderCard = styled.div<{$row: number}>`
-  grid-column: 3;
-  grid-row: ${(p) => p.$row};
+const ConfigColumn = styled.div`
+  display: flex;
+  flex: 0 0 19.625rem;
+  width: 19.625rem;
+  min-width: 0;
+  flex-direction: column;
+  gap: .5rem;
+`;
+
+const SliderCard = styled.div`
   display: flex;
   flex-direction: column;
+  gap: .5rem;
   width: 100%;
+  flex: 0 0 6.765625rem;
   height: 6.765625rem;
   box-sizing: border-box;
   padding: .5rem;
@@ -231,11 +271,30 @@ const SliderCard = styled.div<{$row: number}>`
   background: var(--surface-quiet);
 `;
 
+const DropdownCard = styled(SliderCard)`
+  justify-content: space-between;
+`;
+
+const SettingSelect = styled.select`
+  width: 100%;
+  height: 2.25rem;
+  box-sizing: border-box;
+  padding: 0 .625rem;
+  border: 0;
+  border-radius: .5rem;
+  outline: none;
+  color: var(--text-primary);
+  background: var(--slider-background);
+  font: inherit;
+  font-size: .75rem;
+  cursor: pointer;
+`;
+
 const SettingHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 1rem;
+  height: 1.03rem;
   color: var(--text-primary);
 `;
 
@@ -304,35 +363,38 @@ const SliderOuter = styled.div`
 
 const SliderTrack = styled.div`
   position: absolute;
-  inset: 0 .375rem;
-  height: 2rem;
+  inset: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 .375rem;
   border-radius: .375rem;
   background: var(--slider-track);
+  overflow: hidden;
 `;
 
 const SliderProgress = styled.div<{$ratio: number}>`
   position: absolute;
-  left: 0;
+  left: .375rem;
   top: 0;
-  width: ${(p) => `${p.$ratio * 100}%`};
+  width: ${(p) => `calc(${p.$ratio * 100}% - ${p.$ratio * .75}rem)`};
   height: 100%;
-  border-radius: .375rem;
+  border-radius: .375rem 0 0 .375rem;
   background: var(--slider-progress);
 `;
 
 const SliderThumb = styled.div<{$ratio: number}>`
   position: absolute;
   z-index: 2;
-  left: ${(p) => `${p.$ratio * 100}%`};
+  left: ${(p) => `calc(.375rem + ${p.$ratio * 100}% - ${p.$ratio * .75}rem)`};
   top: 50%;
   width: 1rem;
-  height: 2.1875rem;
+  height: 2.2rem;
   box-sizing: border-box;
   transform: translate(-50%, -50%);
-  border: .125rem solid var(--slider-thumb-border);
-  border-radius: .375rem;
-  background: var(--slider-thumb-background);
-  box-shadow: 0 .125rem .25rem rgba(0,0,0,.1);
+  border: 0;
+  border-radius: .36rem;
+  background: var(--slider-progress);
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .1);
   pointer-events: none;
 `;
 
@@ -347,12 +409,12 @@ const SliderInput = styled.input`
   cursor: pointer;
 `;
 
-const DirectionCard = styled.div<{$row: number}>`
-  grid-column: 3;
-  grid-row: ${(p) => p.$row};
+const DirectionCard = styled.div`
   display: flex;
   flex-direction: column;
+  gap: .5rem;
   width: 100%;
+  flex: 0 0 5.28125rem;
   height: 5.28125rem;
   box-sizing: border-box;
   padding: .5rem;
@@ -386,28 +448,17 @@ const DirectionOption = styled.button<{$active: boolean}>`
 `;
 
 // === 颜色 ===
-const ColorSection = styled.div`
-  display: grid;
-  grid-template-columns: 15.5rem 1fr;
-  grid-template-rows: 1.25rem 14rem 1.25rem 2rem;
-  row-gap: .75rem;
-  column-gap: .5rem;
-  padding: .75rem .5rem;
-  grid-column: 4;
-  grid-row: 1 / span 5;
-  align-content: start;
-  background: var(--surface-quiet);
-  align-items: start;
-  > :nth-child(1) { grid-column: 1 / -1; grid-row: 1; }
-  > :nth-child(2) { grid-column: 1; grid-row: 2; }
-  > :nth-child(3) { grid-column: 1; grid-row: 3; }
-  > :nth-child(4) { display: none; }
-  > :nth-child(5) { grid-column: 1; grid-row: 4; align-self: center; }
-  > :nth-child(6) { grid-column: 1; grid-row: 4; justify-self: end; align-self: center; }
-  > :nth-child(7) { grid-column: 2; grid-row: 2; padding-top: 1.75rem; }
-  > :nth-child(8) { grid-column: 2; grid-row: 2; align-content: start; padding-top: 1.75rem; }
-  > :nth-child(9) { grid-column: 2; grid-row: 2; align-self: start; padding-top: 10rem; }
-  > :nth-child(10) { grid-column: 2; grid-row: 2; align-self: start; padding-top: 12rem; }
+const ColorPanel = styled.div`
+  display: flex;
+  flex: 1 0 0;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: .25rem;
+  box-sizing: border-box;
+  padding: .25rem .5rem .5rem;
+  background: var(--surface-card);
+  border-radius: 1rem;
 `;
 
 const ColorHeader = styled.div`
@@ -415,26 +466,129 @@ const ColorHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  height: 1.875rem;
+  flex: 0 1 auto;
 `;
 
-const ColorWheel = styled.div`
-  width: 15rem;
-  height: 14rem;
+const ColorTitle = styled.span`
+  font-size: .875rem;
+  font-weight: 900;
+  line-height: normal;
+  color: var(--text-black-l-title);
+`;
+
+const ColorContent = styled.div`
+  display: flex;
+  flex: 1 0 0;
+  min-height: 0;
+  gap: .5rem;
+`;
+
+const ColorPickerColumn = styled.div`
+  display: flex;
+  flex: 0 0 15.625rem;
+  height: 19.58rem;
+  min-width: 0;
+  flex-direction: column;
+  gap: .5rem;
+`;
+
+const PresetColumn = styled.div`
+  display: flex;
+  flex: 1 0 0;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: .5rem;
+`;
+
+const PresetCard = styled.div`
+  display: flex;
+  flex: 1 0 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: .5rem;
+  box-sizing: border-box;
+  padding: .5rem;
+  background: var(--button-black-xs-min);
   border-radius: .75rem;
+  overflow: auto;
+`;
+
+const ColorInputRow = styled.div`
+  display: flex;
+  align-items: stretch;
+  gap: .5rem;
+  width: 100%;
+  height: 2.25rem;
+  flex: 0 0 2.25rem;
+`;
+
+const ColorWheel = styled.div<{$hue: number}>`
+  position: relative;
+  flex: 0 0 14.125rem;
+  width: 15.625rem;
+  height: 14.125rem;
+  box-sizing: border-box;
+  border: 1px solid var(--color-picker-wheel-border);
+  border-radius: 1.1rem;
   background:
     linear-gradient(to top, #000, transparent),
     linear-gradient(to right, #fff, transparent),
-    linear-gradient(135deg, #5a00ff, #00b7ff);
+    hsl(${(p) => p.$hue}, 100%, 50%);
 `;
 
 const HueBar = styled.div`
-  width: 15rem;
-  height: 1rem;
-  border-radius: .5rem;
-  background: linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);
+  position: relative;
+  flex: 0 0 2.2rem;
+  width: 15.625rem;
+  height: 2.2rem;
+  margin-top: 0;
+  border-radius: .75rem;
+  border: 1px solid var(--color-picker-wheel-border);
+  box-sizing: border-box;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);
+  }
+`;
+
+const PickerHandle = styled.span<{$x: number; $y: number; $color: string}>`
+  position: absolute;
+  left: ${(p) => `${p.$x * 100}%`};
+  top: ${(p) => `${p.$y * 100}%`};
+  width: 1.25rem;
+  height: 1.25rem;
+  box-sizing: border-box;
+  border: 2px solid #000;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: ${(p) => p.$color};
+  box-shadow: inset 0 0 0 2px #fff;
+`;
+
+const HueHandle = styled.span<{$x: number; $color: string}>`
+  position: absolute;
+  z-index: 1;
+  left: ${(p) => `${p.$x * 100}%`};
+  top: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  box-sizing: border-box;
+  border: 2px solid #000;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: ${(p) => p.$color};
+  box-shadow: inset 0 0 0 2px #fff;
 `;
 
 const ColorInput = styled.input`
+  position: absolute;
   width: 0;
   height: 0;
   opacity: 0;
@@ -448,14 +602,17 @@ const ColorInput = styled.input`
 `;
 
 const HexInput = styled.input`
-  width: 72px;
-  border: 1px solid var(--black-8);
-  border-radius: var(--border-radius-s);
-  padding: 4px 8px;
-  font-size: 0.75rem;
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: .75rem;
+  padding: .25rem .6875rem;
+  font-size: .75rem;
   font-family: 'SF Mono', Menlo, monospace;
   color: var(--text-black-l-title);
-  background: var(--surface-card);
+  background: var(--button-black-xs-min);
   outline: none;
   &:focus {
     border-color: var(--theme-color);
@@ -470,16 +627,17 @@ const ColorLabel = styled.span`
 
 const Swatches = styled.div`
   display: flex;
-  gap: 6px;
+  gap: .5rem;
   flex-wrap: wrap;
 `;
 
 const Swatch = styled.button<{$active?: boolean}>`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid ${(p) => (p.$active ? 'var(--theme-color)' : 'var(--white-100)')};
-  box-shadow: 0 0 0 1px var(--black-8);
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: .75rem;
+  border: 1px solid var(--white-100);
+  box-shadow: ${(p) => (p.$active ? '0 0 0 1px var(--theme-color)' : 'none')};
   cursor: pointer;
 `;
 
@@ -488,22 +646,56 @@ const PRESET_COLORS = [
   '#d948a5', '#ed3434', '#f8c23c', '#71d7e4', '#5be94d', '#3735dc', '#db42d2',
 ];
 
+// 顺序必须与 VIA JSON 的 Effect options 一一对应。不能按视觉图标顺序
+// 截断或重排，否则写回设备的 effect id 会与面板名称错位。
 const EFFECT_LABELS = [
-  '光谱', '阶梯', '静态', '呼吸', '百花', '波浪', '上下波浪', '喷泉',
-  '银河', '旋转', '涟漪', '单点', '宫格', '流光', '落雨', '波带', '游戏', '定位', '风车', '双标',
+  '关闭灯光', '静态颜色', '上下渐变', '左右渐变', '呼吸',
+  '饱和度波浪', '明度波浪', '饱和度旋转', '明度旋转', '饱和度螺旋',
+  '明度螺旋', '循环', '左右循环', '上下循环', '彩虹移动',
+  '内外循环', '双向内外循环', '旋转循环', '螺旋循环', '双灯塔',
+  '彩虹灯塔', '彩虹旋转', '雨滴', '彩色雨滴', '色相呼吸',
+  '色相摆动', '色相波浪', '打字热力图', '数字雨', '响应单点',
+  '响应波纹', '响应宽波纹', '响应多宽波纹', '响应十字', '响应多十字',
+  '响应中心', '响应多中心', '溅射', '多重溅射', '单色溅射',
+  '多色溅射', '游戏模式', '定位模式',
 ];
 
 // JSON menus 里的英文标签 → 原版中文
 const LABEL_MAP: Record<string, string> = {
   Backlight: '背光灯',
+  'Side Light': '条型灯',
   Brightness: '亮度',
   Effect: '效果',
+  Mode: '模式',
   'Effect Speed': '变换速度',
+  'Speed (higher is slower)': '变换速度',
   Direction: '变换方向',
   Color: '颜色',
+  'Static Color': '静态颜色',
   'Strip Light': '条形灯',
 };
 const tLabel = (s: string): string => LABEL_MAP[s] ?? s;
+
+// Halo V2 stock firmware advertises the side-light functions as custom
+// keycodes, not as VIA menus. Keep this candidate definition local to this
+// page so VIA's generic menu loader never probes unsupported commands.
+const SIDE_LIGHT_ZONE: LightingZone = {
+  label: 'Side Light',
+  items: [
+    {
+      id: 'id_side_light_mode', label: 'Mode', type: 'dropdown', options: ['Wave', 'Mix', 'Static', 'Breath', 'Off'], channel: 0, command: 10,
+    },
+    {
+      id: 'id_side_light_speed', label: 'Speed (higher is slower)', type: 'dropdown', options: ['1', '2', '3', '4', '5'], channel: 0, command: 11, showIf: '{id_side_light_mode} != 4',
+    },
+    {
+      id: 'id_side_light_static_color', label: 'Static Color', type: 'color', channel: 0, command: 14, showIf: '{id_side_light_mode} == 0 || {id_side_light_mode} == 2 || {id_side_light_mode} == 3',
+    },
+    {
+      id: 'id_side_light_brightness', label: 'Brightness', type: 'range', options: ['0', '5'], channel: 0, command: 13, showIf: '{id_side_light_mode} != 4',
+    },
+  ],
+};
 
 const RECENT_KEY = 'nuphy-recent-colors';
 const readRecent = (): string[] => {
@@ -535,12 +727,23 @@ const rangeRatio = (value: number, range: NumericRange): number =>
 
 const showIfMatches = (item: LightingZone['items'][number] | undefined, values: Record<string, number>): boolean => {
   if (!item?.showIf) return true;
-  const match = /^\{([^}]+)\}\s*(==|!=)\s*(-?\d+(?:\.\d+)?)$/.exec(item.showIf.trim());
-  if (!match) return true;
-  const current = values[match[1]];
-  if (current === undefined) return true;
-  const expected = Number(match[3]);
-  return match[2] === '==' ? current === expected : current !== expected;
+  const evaluate = (expression: string): boolean | undefined => {
+    const match = /^\{([^}]+)\}\s*(==|!=)\s*(-?\d+(?:\.\d+)?)$/.exec(expression.trim());
+    if (!match) return undefined;
+    const current = values[match[1]];
+    if (current === undefined) return undefined;
+    const expected = Number(match[3]);
+    return match[2] === '==' ? current === expected : current !== expected;
+  };
+  const orGroups = item.showIf.split(/\s*\|\|\s*/);
+  let hasUnknown = false;
+  for (const group of orGroups) {
+    const andResults = group.split(/\s*&&\s*/).map(evaluate);
+    if (andResults.some((result) => result === true)) return true;
+    if (andResults.some((result) => result === undefined)) hasUnknown = true;
+    if (andResults.every((result) => result === false)) continue;
+  }
+  return hasUnknown;
 };
 
 const directionGlyph = (label: string, index: number): string => {
@@ -551,54 +754,61 @@ const directionGlyph = (label: string, index: number): string => {
 
 export const LightingPage: React.FC = () => {
   const {mode, api, definition, initDemo} = useKeyboardStore();
-  const parsedZones = parseLightingMenus(definition);
-  // Halo65 V2 的侧灯与主灯共用 VIA 灯效通道；NuPhy 页面仍将它们
-  // 作为两个可切换的视觉分区展示，因此这里补足第二张分区卡片。
   const zones = useMemo(() => {
-    if (parsedZones.length !== 1) return parsedZones;
-    return [...parsedZones, {...parsedZones[0], label: 'Strip Light'}];
-  }, [parsedZones]);
+    const parsed = parseLightingMenus(definition);
+    const hasSideLightKeycodes = Boolean(definition?.customKeycodes?.some((item) => /side\s*(light|mode|color|fast|slow)/i.test(item.title ?? item.name)));
+    return hasSideLightKeycodes ? [...parsed, SIDE_LIGHT_ZONE] : parsed;
+  }, [definition]);
   const [zoneIdx, setZoneIdx] = useState(0);
-  const [brightness, setBrightness] = useState(255);
+  const [brightness, setBrightness] = useState(0);
   const [speed, setSpeed] = useState(128);
-  const [effect, setEffect] = useState(1);
+  const [effect, setEffect] = useState(0);
   const [directionIndex, setDirectionIndex] = useState(1);
   const [color, setColor] = useState('#d9d9d9');
   const [hexText, setHexText] = useState('#d9d9d9');
+  const initialHsv = hexToHsv('#d9d9d9');
+  const [pickerHue, setPickerHue] = useState(initialHsv.h);
+  const [pickerSat, setPickerSat] = useState(initialHsv.s / 255);
+  const [pickerValue, setPickerValue] = useState(initialHsv.v / 255);
   const [recent, setRecent] = useState<string[]>(readRecent());
-  const [zoneEnabled, setZoneEnabled] = useState<boolean[]>([true, true]);
-  const [allLightsOn, setAllLightsOn] = useState(false);
+  const previousEffect = useRef<Record<number, number>>({});
+  const zoneEffects = useRef<Record<number, number>>({});
 
   const zone: LightingZone | undefined = zones[zoneIdx];
   const effectItem = zone ? findItem(zone, 'dropdown') : undefined;
   const brightnessItem = zone ? findItem(zone, 'range', 'Brightness') : undefined;
-  const speedItem = zone ? findItem(zone, 'range', 'Speed') : undefined;
+  const speedItem = zone?.items.find((item) => /speed|速度/i.test(item.label));
   const directionItem = zone ? zone.items.find((item) => /direction|方向/i.test(item.label)) : undefined;
   const colorItem = zone ? findItem(zone, 'color') : undefined;
-  const fullEffects = effectItem?.options?.slice(0, 20) ?? [];
-  const stripEffectIds = [0, 1, 2, 5, 17];
-  const effectChoices = zoneIdx === 1
-    ? stripEffectIds.map((sourceIndex) => ({sourceIndex, name: EFFECT_LABELS[sourceIndex]}))
-    : fullEffects.map((name, sourceIndex) => ({sourceIndex, name: EFFECT_LABELS[sourceIndex] ?? name}));
-  const effectValue = effectChoices[effect]?.sourceIndex ?? 0;
+  const isSideLight = /side light|条型灯|条形灯/i.test(zone?.label ?? '');
+  const colorWheelRef = useRef<HTMLDivElement>(null);
+  const hueBarRef = useRef<HTMLDivElement>(null);
+  const effectChoices = (effectItem?.options ?? []).map((name, sourceIndex) => ({
+    sourceIndex,
+    name: isSideLight ? (['波浪', '混合', '静态颜色', '呼吸', '关闭灯光'][sourceIndex] ?? name) : (EFFECT_LABELS[sourceIndex] ?? name),
+  }));
+  const effectValue = effectChoices[effect]?.sourceIndex ?? effect;
+  const offEffectValue = effectChoices.find(({name}) => /all off|off|关闭灯光/i.test(name))?.sourceIndex ?? 0;
+  const lightIsOn = effectValue !== offEffectValue;
   const showIfValues = effectItem ? {[effectItem.id]: effectValue} : {};
   const showSpeed = Boolean(speedItem && showIfMatches(speedItem, showIfValues));
   const showBrightness = Boolean(brightnessItem && showIfMatches(brightnessItem, showIfValues));
   const showDirection = Boolean(directionItem && showIfMatches(directionItem, showIfValues));
   const showColor = Boolean(colorItem && showIfMatches(colorItem, showIfValues));
-  const speedRange = rangeFromItem(speedItem, {min: 0, max: 255});
+  const speedOptions = speedItem?.type === 'dropdown' ? (speedItem.options ?? []) : [];
+  const speedRange = speedItem?.type === 'dropdown'
+    ? {min: 0, max: Math.max(0, speedOptions.length - 1)}
+    : rangeFromItem(speedItem, {min: 0, max: 255});
   const brightnessRange = rangeFromItem(brightnessItem, {min: 0, max: 255});
   const speedValue = clampToRange(speed, speedRange);
   const brightnessValue = clampToRange(brightness, brightnessRange);
   const directionOptions = directionItem?.options?.length
     ? directionItem.options
     : ['left', 'right'];
-  const brightnessRow = 2 + (showSpeed ? 1 : 0);
-  const directionRow = brightnessRow + (showBrightness ? 1 : 0);
 
   useEffect(() => {
-    if (zoneIdx === 1 && effect >= effectChoices.length) setEffect(0);
-  }, [zoneIdx, effectChoices.length, effect]);
+    if (effectChoices.length && effect >= effectChoices.length) setEffect(0);
+  }, [effectChoices.length, effect]);
 
   useEffect(() => {
     if (mode === 'disconnected') initDemo();
@@ -611,26 +821,33 @@ export const LightingPage: React.FC = () => {
         try {
           if (brightnessItem) {
             const res = await api.getCustomMenuValue([brightnessItem.channel, brightnessItem.command]);
-            if (res[1] !== undefined) setBrightness(res[1]);
+            if (res[0] !== undefined) setBrightness(res[0]);
           }
           if (speedItem) {
             const res = await api.getCustomMenuValue([speedItem.channel, speedItem.command]);
-            if (res[1] !== undefined) setSpeed(res[1]);
+            if (res[0] !== undefined) setSpeed(res[0]);
           }
           if (effectItem) {
             const res = await api.getCustomMenuValue([effectItem.channel, effectItem.command]);
-            if (res[1] !== undefined) setEffect(res[1]);
+            if (res[0] !== undefined) {
+              setEffect(res[0]);
+              zoneEffects.current[zoneIdx] = res[0];
+            }
           }
           if (directionItem) {
             const res = await api.getCustomMenuValue([directionItem.channel, directionItem.command]);
-            if (res[1] !== undefined) setDirectionIndex(res[1]);
+            if (res[0] !== undefined) setDirectionIndex(res[0]);
           }
           if (colorItem) {
             const res = await api.getCustomMenuValue([colorItem.channel, colorItem.command]);
-            if (res[1] !== undefined && res[2] !== undefined) {
-              const hex = hsvToHex(hueToDeg(res[1]), res[2]);
+            if (res[0] !== undefined && res[1] !== undefined) {
+              const hex = hsvToHex(hueToDeg(res[0]), res[1], 255);
               setColor(hex);
               setHexText(hex);
+              const hsv = hexToHsv(hex);
+              setPickerHue(hsv.h);
+              setPickerSat(hsv.s / 255);
+              setPickerValue(hsv.v / 255);
             }
           }
         } catch {}
@@ -648,15 +865,55 @@ export const LightingPage: React.FC = () => {
   };
 
   const applyColor = (hex: string) => {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
     setColor(hex);
     setHexText(hex);
-    const {h, s} = hexToHsv(hex);
+    const {h, s, v} = hexToHsv(hex);
+    setPickerHue(h);
+    setPickerSat(s / 255);
+    setPickerValue(v / 255);
+    // QMK RGB Matrix 的 color 菜单只有 H/S 两个字节；V 不在这里写，
+    // 而是由同一个区域的 Brightness 菜单单独控制。
     if (colorItem) write(colorItem, degToHue(h), s);
     const next = [hex, ...recent.filter((c) => c !== hex)].slice(0, 8);
     setRecent(next);
     try {
       localStorage.setItem(RECENT_KEY, JSON.stringify(next));
     } catch {}
+  };
+
+  const pickColorSquare = (event: React.PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const y = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+    setPickerSat(x);
+    setPickerValue(1 - y);
+    applyColor(hsvToHex(pickerHue, Math.round(x * 255), Math.round((1 - y) * 255)));
+  };
+
+  const pickHue = (event: React.PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const nextHue = Math.round(x * 360);
+    setPickerHue(nextHue);
+    applyColor(hsvToHex(nextHue, Math.round(pickerSat * 255), Math.round(pickerValue * 255)));
+  };
+
+  const setEffectValue = (next: number) => {
+    if (!effectItem) return;
+    if (next !== offEffectValue) previousEffect.current[zoneIdx] = next;
+    zoneEffects.current[zoneIdx] = next;
+    setEffect(next);
+    void write(effectItem, next);
+  };
+
+  const toggleZone = () => {
+    if (!effectItem) return;
+    const firstEnabled = effectChoices.find(({sourceIndex}) => sourceIndex !== offEffectValue)?.sourceIndex ?? 0;
+    const next = effectValue === offEffectValue
+      ? (previousEffect.current[zoneIdx] ?? firstEnabled)
+      : offEffectValue;
+    setEffectValue(next);
   };
 
   if (zones.length === 0) {
@@ -679,70 +936,100 @@ export const LightingPage: React.FC = () => {
       <PageNav><NavTabs /></PageNav>
       <Card>
         <ZoneTabs>
-          {zones.map((z, i) => (
+          {zones.map((z, i) => {
+            const sideLightDisabled = /side light|条型灯|条形灯/i.test(z.label);
+            const zoneEffect = zoneEffects.current[i] ?? (i === zoneIdx ? effectValue : 0);
+            const zoneOffValue = findItem(z, 'dropdown')?.options?.findIndex((option) => /all off|off|关闭灯光/i.test(option)) ?? 0;
+            const zoneOn = zoneEffect !== zoneOffValue;
+            return (
             <ZoneTab
               key={z.label}
               $active={i === zoneIdx}
+              $disabled={sideLightDisabled}
+              aria-disabled={sideLightDisabled}
               title={`切换到${tLabel(z.label)}设置`}
-              onClick={() => setZoneIdx(i)}
+              onClick={() => {
+                if (!sideLightDisabled) setZoneIdx(i);
+              }}
               >
                 <img
                 src={
                   i === zoneIdx
-                    ? i === 0
-                      ? keyMatrixLightCheck
-                      : stripLightCheck
-                    : i === 0
-                      ? keyMatrixLight
-                      : stripLight
+                    ? keyMatrixLightCheck
+                    : keyMatrixLight
                 }
                 alt=""
                 />
               <ZoneDetail>
                 <ZoneText>
                   <ZoneLabel $active={i === zoneIdx}>{tLabel(z.label)}设置</ZoneLabel>
-                  <ZoneDescription $active={i === zoneIdx}>设置键盘的{tLabel(z.label)}效果</ZoneDescription>
+                  <ZoneDescription $active={i === zoneIdx}>
+                    {sideLightDisabled ? 'VIA暂无法支持' : `设置键盘的${tLabel(z.label)}效果`}
+                  </ZoneDescription>
                 </ZoneText>
                 <span
                   role="switch"
-                  aria-checked={zoneEnabled[i] ?? true}
+                  aria-checked={zoneOn}
                   onClick={(event) => {
                     event.stopPropagation();
-                    setZoneEnabled((current) => current.map((value, index) => index === i ? !value : value));
+                    if (i === zoneIdx) toggleZone();
                   }}
                 >
-                  <ZoneSwitch $on={zoneEnabled[i] ?? true} />
+                  <ZoneSwitch $on={zoneOn} />
                 </span>
               </ZoneDetail>
             </ZoneTab>
-          ))}
+            );
+          })}
         </ZoneTabs>
 
+        <MiddlePanel>
         <SectionHeader>灯光设置</SectionHeader>
+        <MiddleControls>
 
         {effectItem && effectItem.options && (
           <EffectGrid>
-            {effectChoices.map(({sourceIndex, name}, i) => (
+            {effectChoices.map(({sourceIndex, name}) => (
               <EffectItem
                 key={`${name}-${sourceIndex}`}
-                $active={i === effect}
+                $active={sourceIndex === effectValue}
                 title={`${name}：${effectItem.options?.[sourceIndex] ?? name}`}
                 onClick={() => {
-                  setEffect(i);
-                  write(effectItem, sourceIndex);
+                  setEffectValue(sourceIndex);
                 }}
               >
-                <EffectDot $active={i === effect}>
+                <EffectDot $active={sourceIndex === effectValue}>
                   <svg viewBox="0 0 25 24" aria-hidden="true"><use href={`${lightSprite}#lightType${sourceIndex}`} /></svg>
                 </EffectDot>
-                <EffectName $active={i === effect}>{name}</EffectName>
+                <EffectName $active={sourceIndex === effectValue}>{name}</EffectName>
               </EffectItem>
             ))}
           </EffectGrid>
         )}
 
-        {showSpeed && speedItem && (
-          <SliderCard $row={2}>
+        <ConfigColumn>
+        {showSpeed && speedItem?.type === 'dropdown' && (
+          <DropdownCard>
+            <SettingHeader>
+              <SettingTitle>{tLabel(speedItem.label)}</SettingTitle>
+              <SettingValue>{speedOptions[speedValue] ?? speedValue}</SettingValue>
+            </SettingHeader>
+            <SettingSelect
+              aria-label={tLabel(speedItem.label)}
+              value={speedValue}
+              onChange={(event) => {
+                const value = Number(event.target.value);
+                setSpeed(value);
+                write(speedItem, value);
+              }}
+            >
+              {speedOptions.map((option, index) => <option key={`${option}-${index}`} value={index}>{option}</option>)}
+            </SettingSelect>
+          </DropdownCard>
+        )}
+
+        {showSpeed && speedItem?.type === 'range' && (
+          <SliderCard>
             <SettingHeader>
               <SettingTitle>{tLabel(speedItem.label)}</SettingTitle>
               <SettingValue>{Math.round(rangeRatio(speedValue, speedRange) * 4)} 档</SettingValue>
@@ -779,7 +1066,7 @@ export const LightingPage: React.FC = () => {
         )}
 
         {showBrightness && brightnessItem && (
-          <SliderCard $row={brightnessRow}>
+          <SliderCard>
             <SettingHeader>
               <SettingTitle>{tLabel(brightnessItem.label)}</SettingTitle>
               <SettingValue>{Math.round(rangeRatio(brightnessValue, brightnessRange) * 100)}%</SettingValue>
@@ -816,7 +1103,7 @@ export const LightingPage: React.FC = () => {
         )}
 
         {showDirection && (
-          <DirectionCard $row={directionRow}>
+          <DirectionCard>
             <SettingHeader>
               <SettingTitle>变换方向</SettingTitle>
               <SettingValue />
@@ -838,60 +1125,92 @@ export const LightingPage: React.FC = () => {
             </DirectionOptions>
           </DirectionCard>
         )}
+        </ConfigColumn>
+        </MiddleControls>
+        </MiddlePanel>
 
         {showColor && colorItem && (
-          <ColorSection>
+          <ColorPanel>
             <ColorHeader>
-              <ColorLabel>自定义颜色</ColorLabel>
+              <ColorTitle>自定义颜色</ColorTitle>
               <GlobalLightToggle
                 className="global-light-toggle"
                 role="switch"
                 aria-label="关闭灯光"
-                aria-checked={allLightsOn}
-                $on={allLightsOn}
-                onClick={() => setAllLightsOn((value) => !value)}
+              aria-checked={lightIsOn}
+                $on={lightIsOn}
+                onClick={toggleZone}
               />
             </ColorHeader>
-            <ColorWheel />
-            <HueBar />
-            <ColorInput
-              type="color"
-              value={color}
-              onChange={(e) => applyColor(e.target.value)}
-            />
-            <ColorLabel>HEX</ColorLabel>
-            <HexInput
-              value={hexText}
-              onChange={(e) => {
-                setHexText(e.target.value);
-                const v = e.target.value;
-                if (/^#[0-9a-fA-F]{6}$/.test(v)) applyColor(v);
-              }}
-            />
-            <ColorLabel>颜色预设</ColorLabel>
-            <Swatches>
-              {PRESET_COLORS.map((c) => (
-                <Swatch
-                  key={c}
-                  title={`选择颜色 ${c}`}
-                  style={{background: c}}
-                  $active={c === color}
-                  onClick={() => applyColor(c)}
+            <ColorContent>
+              <ColorPickerColumn>
+                <ColorWheel
+                  ref={colorWheelRef}
+                  $hue={pickerHue}
+                  onPointerDown={pickColorSquare}
+                  onPointerMove={(event) => event.buttons === 1 && pickColorSquare(event)}
+                  aria-label="颜色选择"
+                  role="slider"
+                >
+                  <PickerHandle $x={pickerSat} $y={1 - pickerValue} $color={color} />
+                </ColorWheel>
+                <HueBar
+                  ref={hueBarRef}
+                  onPointerDown={pickHue}
+                  onPointerMove={(event) => event.buttons === 1 && pickHue(event)}
+                  aria-label="色相选择"
+                  role="slider"
+                >
+                  <HueHandle $x={pickerHue / 360} $color={hsvToHex(pickerHue, 255, 255)} />
+                </HueBar>
+                <ColorInput
+                  type="color"
+                  value={color}
+                  onChange={(e) => applyColor(e.target.value)}
                 />
-              ))}
-            </Swatches>
-            <ColorLabel>最近使用</ColorLabel>
-            <Swatches>
-              {recent.map((c) => (
-                <Swatch
-                  key={c}
-                  title={`选择最近使用颜色 ${c}`}
-                  style={{background: c}}
-                  onClick={() => applyColor(c)}
-                />
-              ))}
-            </Swatches>
-          </ColorSection>
+                <ColorInputRow>
+                  <ColorLabel>HEX</ColorLabel>
+                  <HexInput
+                    value={hexText}
+                    onChange={(e) => {
+                      setHexText(e.target.value);
+                      const v = e.target.value;
+                      if (/^#[0-9a-fA-F]{6}$/.test(v)) applyColor(v);
+                    }}
+                  />
+                </ColorInputRow>
+              </ColorPickerColumn>
+              <PresetColumn>
+                <PresetCard>
+                  <ColorLabel>颜色预设</ColorLabel>
+                  <Swatches>
+                    {PRESET_COLORS.map((c) => (
+                      <Swatch
+                        key={c}
+                        title={`选择颜色 ${c}`}
+                        style={{background: c}}
+                        $active={c === color}
+                        onClick={() => applyColor(c)}
+                      />
+                    ))}
+                  </Swatches>
+                </PresetCard>
+                <PresetCard>
+                  <ColorLabel>最近使用</ColorLabel>
+                  <Swatches>
+                    {recent.map((c) => (
+                      <Swatch
+                        key={c}
+                        title={`选择最近使用颜色 ${c}`}
+                        style={{background: c}}
+                        onClick={() => applyColor(c)}
+                      />
+                    ))}
+                  </Swatches>
+                </PresetCard>
+              </PresetColumn>
+            </ColorContent>
+          </ColorPanel>
         )}
 
       </Card>

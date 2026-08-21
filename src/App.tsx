@@ -19,8 +19,9 @@ import {KeyTestPanel} from './components/KeyTestPanel';
 const AppContainerBac = styled.div`
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 100vh;
-  background: var(--surface-page);
+  background-color: var(--box-nested-white-xl-max);
   padding: 0.5rem;
   background-image: var(--app-background-image);
   background-position: center bottom;
@@ -32,7 +33,9 @@ const AppContainerBac = styled.div`
 const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
+  height: 100%;
   flex: 1;
+  width: 100%;
 `;
 
 function ComingSoon() {

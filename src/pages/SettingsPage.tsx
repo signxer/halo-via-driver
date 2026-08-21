@@ -4,8 +4,6 @@ import {useNavigate} from 'react-router-dom';
 import {useKeyboardStore} from '../store/keyboard';
 import {useThemeStore} from '../store/theme';
 import {messages} from '../i18n';
-const socialSprite = '/social-symbols.svg';
-
 // ============================================================
 // 设置页 — 复刻原版 GlobalSettingsPage 结构
 // .title(设置+关闭) + .content
@@ -138,6 +136,7 @@ const ReferenceSettings = styled.div`
   flex-direction: column;
   gap: .5rem;
   > div:nth-child(3) > div { min-height: 4.25rem; }
+  > div:first-child { border-radius: 0 0 1rem 1rem; }
 `;
 
 const ReferenceGroup = styled.div`
@@ -178,37 +177,6 @@ const ReferenceSwitch = styled.button<{$on:boolean}>`
   width:2.5rem; height:1.5rem; border-radius:.75rem; padding:.125rem;
   background:${p=>p.$on?'#34c759':'#787880'};
   &::after { content:''; display:block; width:1.25rem; height:1.25rem; border-radius:50%; background:#fff; transform:${p=>p.$on?'translateX(1rem)':'translateX(0)'}; }
-`;
-
-const ReferenceFooter = styled.div`
-  display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin:0 0 0 .5rem;
-`;
-
-const FeedbackBox = styled.div`
-  min-height:12.25rem; padding:.75rem; border-radius:1rem; background:var(--surface-card);
-  box-shadow:0 .125rem .5rem var(--black-4);
-  display:grid; grid-template-columns:repeat(4,1fr); gap:.25rem;
-  a, span { display:flex; align-items:center; justify-content:center; min-height:2.25rem; border-radius:.5rem; background:var(--black-2); color:var(--text-black-l-title); font-size:.6875rem; font-weight:700; text-decoration:none; }
-  .feedback { grid-column:1/-1; display:block; background:none; min-height:0; font-size:.625rem; font-weight:500; }
-  .social-icon svg { width:1.25rem; height:1.25rem; fill:currentColor; }
-`;
-
-const DownloadBox = styled.div`
-  min-height:12.25rem; padding:.5rem; border-radius:1rem; background:var(--surface-card);
-  box-shadow:0 .125rem .5rem var(--black-4); display:flex; flex-direction:column; gap:.5rem;
-`;
-
-const DownloadRow = styled.div`
-  flex:1; display:flex; align-items:center; gap:.625rem; padding:.125rem 0 .125rem 1.5rem; border-radius:.625rem;
-  .window { position:relative; width:10rem; height:4.75rem; flex:none; padding:.5rem .625rem; border-radius:.5rem; background:linear-gradient(135deg,#dce8f3 0%,#90acc8 100%); color:#314455; overflow:hidden; }
-  .window b { display:block; font-size:.625rem; font-weight:800; }
-  .window small { display:block; margin-top:1.25rem; font-size:.5rem; font-weight:700; }
-  .window i { position:absolute; right:.5rem; bottom:.5rem; font-style:normal; font-size:1rem; }
-  .mac { background:linear-gradient(135deg,#efb5dc 0%,#ad38a8 100%); color:#fff; }
-  .mac::before { content:'●  ●  ●'; display:block; font-size:.5rem; letter-spacing:.125rem; }
-  strong { display:block; font-size:.6875rem; }
-  small { display:block; margin-top:.125rem; color:var(--text-black-s-content); font-size:.5625rem; }
-  button { margin-left:auto; padding:.375rem .5rem; border-radius:.375rem; background:var(--black-86); color:#fff; font-size:.5625rem; font-weight:700; }
 `;
 
 // ---- 开关(原版 switch 样式) ----
@@ -423,20 +391,6 @@ export const SettingsPage: React.FC = () => {
             <ReferenceRow><div><h4>切换语言</h4><p>切换 NuPhyIO 显示语言</p></div><ReferencePill>简体中文⌄</ReferencePill></ReferenceRow>
             <ReferenceRow><div><h4>主题切换</h4><p>切换 NuPhyIO 显示主题，支持亮色、暗色两种模式。</p></div><ReferencePill onClick={toggleTheme}>{theme === 'dark' ? '暗色模式⌄' : '亮色模式⌄'}</ReferencePill></ReferenceRow>
           </ReferenceGroup>
-          <ReferenceFooter>
-            <FeedbackBox>
-              <span>天猫</span><span>京东</span><span>哔哩哔哩</span><span>小红书</span>
-              <span className="social-icon"><svg><use href={`${socialSprite}#settingIconChinese2`} /></svg></span>
-              <span className="social-icon"><svg><use href={`${socialSprite}#settingIconChinese6`} /></svg></span>
-              <span className="social-icon"><svg><use href={`${socialSprite}#settingIconChinese8`} /></svg></span>
-              <span className="social-icon"><svg><use href={`${socialSprite}#settingIconChinese5`} /></svg></span>
-              <a className="feedback" href="mailto:feedback@nuphy.com">feedback@nuphy.com<br/><small>若您有任何有关于键盘和 NuPhyIO 的建议或问题都可以联系我们。</small></a>
-            </FeedbackBox>
-            <DownloadBox>
-              <DownloadRow><span className="window"><b>NuPhy IO</b><small>M2　Win Profile</small><i>◉</i></span><div><strong>IO Windows版</strong><small>NuPhyIO - V2.2.6 | 2026-06-15</small></div><button>立即下载</button></DownloadRow>
-              <DownloadRow><span className="window mac"><b></b><small>M2　Mac Profile</small><i>⌘</i></span><div><strong>IO macOS版</strong><small>NuPhyIO - V2.2.6 | 2026-06-15</small></div><button>立即下载</button></DownloadRow>
-            </DownloadBox>
-          </ReferenceFooter>
         </ReferenceSettings>
 
         {/* 通用 */}

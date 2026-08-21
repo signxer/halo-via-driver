@@ -1,4 +1,5 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 import styled from 'styled-components';
 import {buildKeycodeGroups} from '../utils/keycode';
 import {getByteForCode} from '../via/key';
@@ -112,9 +113,9 @@ const OptionListCart = styled.div`
   box-sizing: border-box;
 `;
 
-const NavBtnContent = styled.div<{$active: boolean}>`
+const NavBtnItem = styled.div<{$active: boolean}>`
   display: flex;
-  min-width: 1.5rem;
+  min-width: 0;
   min-height: 1.5rem;
   padding: 0.125rem 0.25rem;
   justify-content: flex-start;
@@ -130,12 +131,18 @@ const NavBtnContent = styled.div<{$active: boolean}>`
   &:hover {
     background: ${(p) => (p.$active ? 'var(--button-black-l)' : 'var(--button-black-xs-min)')};
   }
-  svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    fill: currentColor;
-    flex-shrink: 0;
-  }
+`;
+
+const NavBtnContent = styled.div`
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+  flex: 1 0 0;
+  border-radius: 0.375rem;
+  padding: 0 0.125rem;
+  gap: 0.5rem;
+  overflow: hidden;
 `;
 
 const NavBtnIcon = styled.div`
@@ -146,17 +153,15 @@ const NavBtnIcon = styled.div`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-`;
-
-const NavBtnInner = styled.div`
-  display: flex;
-  align-items: center;
-  height: 100%;
-  min-width: 0;
-  flex: 1 1 0;
-  gap: 0.5rem;
-  padding: 0 0.125rem;
-  overflow: hidden;
+  svg {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    min-width: 1.25rem;
+    fill: currentColor;
+    color: inherit;
+    stroke: none;
+  }
 `;
 
 const NavBtnName = styled.span<{$active: boolean}>`
@@ -349,6 +354,199 @@ const KeyBtn = styled.button<{
   }
 `;
 
+// 原版 tooltip 会挂在 body 下，而不是放在 key-table-card-content 内，
+// 这样提示框可以越过键码卡片边界显示。结构与原版 tooltipBorderInside_v
+// / tooltipBorderInsideB_top / tooltipBorderInsideB_bottom 对齐。
+const TooltipPortal = styled.div`
+  position: fixed;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  max-height: 0;
+  pointer-events: none;
+`;
+
+const TooltipCard = styled.div<{$visible: boolean}>`
+  visibility: ${(p) => (p.$visible ? 'visible' : 'hidden')};
+  min-width: 4.75rem;
+  min-height: 2rem;
+  position: absolute;
+  bottom: 0;
+  transform-origin: center bottom;
+  animation: ${(p) => (p.$visible ? 'scaleInTop' : 'none')} 0.1s ease;
+
+  .tooltip-top {
+    min-width: 4.75rem;
+    min-height: 2rem;
+    border: 0.09375rem solid var(--box-nested-black-xl-border);
+    border-radius: 10px;
+    background: var(--box-nested-white-xl-max);
+    box-shadow: 0 0.0625rem 0.3125rem rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+
+  .tooltip-content {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .tooltip-content > span {
+    color: var(--text-black-l-title);
+    font-size: 0.75rem;
+  }
+
+  .tooltip-bottom,
+  .tooltip-bottom > div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  .tooltip-bottom {
+    height: 10px;
+  }
+
+  .tooltip-bottom > .tooltip-tail-row {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    flex: 0 0 100%;
+  }
+
+  .tooltip-tail-row {
+    height: 10px;
+  }
+
+  .tooltip-line {
+    width: 20px;
+    height: 0.0625rem;
+    position: absolute;
+    background: var(--box-nested-black-xl-border);
+  }
+
+  .tooltip-face {
+    width: 20px;
+    height: 10px;
+    position: relative;
+    background: var(--box-nested-black-xl-border);
+    clip-path: path('M 0 0 C 10 0 12.5 7.5 20 7.5 L 20 0 Z');
+  }
+
+  .tooltip-face::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    width: 110%;
+    height: 2px;
+    background: var(--box-nested-black-xl-border);
+  }
+
+  .tooltip-face::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    width: 2px;
+    height: 100%;
+    background: var(--box-nested-black-xl-border);
+  }
+
+  .tooltip-face.right {
+    transform: scaleX(-1);
+  }
+
+  .tooltip-fill {
+    position: absolute;
+    top: -1.5px;
+  }
+
+  .tooltip-fill .tooltip-line,
+  .tooltip-fill .tooltip-face {
+    background: var(--box-nested-white-xl-max);
+  }
+
+  .tooltip-fill .tooltip-face::before,
+  .tooltip-fill .tooltip-face::after {
+    background: var(--box-nested-white-xl-max);
+  }
+
+  @keyframes scaleInTop {
+    0% { transform: scale(0.8); transform-origin: center bottom; }
+    100% { transform: scale(1); transform-origin: center bottom; }
+  }
+`;
+
+type KeyTooltipProps = {
+  text: string;
+  children: React.ReactNode;
+  selected: boolean;
+  physical?: boolean;
+  keyWidth?: number;
+  keyHeight?: number;
+  x?: number;
+  y?: number;
+  onClick: () => void;
+};
+
+const KeyTooltip: React.FC<KeyTooltipProps> = ({
+  text, children, selected, physical, keyWidth, keyHeight, x, y, onClick,
+}) => {
+  const targetRef = useRef<HTMLButtonElement>(null);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  const handleEnter = () => {
+    const next = targetRef.current?.getBoundingClientRect();
+    if (next) setRect(next);
+  };
+
+  return (
+    <>
+      <KeyBtn
+        ref={targetRef}
+        $selected={selected}
+        $physical={physical}
+        $keyWidth={keyWidth}
+        $keyHeight={keyHeight}
+        $x={x}
+        $y={y}
+        onClick={onClick}
+        onMouseEnter={handleEnter}
+        onMouseLeave={() => setRect(null)}
+        aria-label={text}
+      >
+        {children}
+      </KeyBtn>
+      {rect && typeof document !== 'undefined' && createPortal(
+        <TooltipPortal style={{left: rect.left, top: rect.top, width: rect.width, height: rect.height}}>
+          <TooltipCard $visible>
+            <div className="tooltip-top">
+              <div className="tooltip-content"><span>{text}</span></div>
+            </div>
+            <div className="tooltip-bottom">
+              <div className="tooltip-tail-row">
+                <div className="tooltip-line" />
+                <div className="tooltip-face" />
+                <div className="tooltip-face right" />
+              </div>
+              <div className="tooltip-tail-row tooltip-fill">
+                <div className="tooltip-line" />
+                <div className="tooltip-face" />
+                <div className="tooltip-face right" />
+              </div>
+            </div>
+          </TooltipCard>
+        </TooltipPortal>,
+        document.body,
+      )}
+    </>
+  );
+};
+
 const KeyLabel = styled.p`
   display: block;
   min-width: 2.375rem;
@@ -496,19 +694,19 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
     const explanation = keycodeExplanation(k.code, k.title ?? k.name);
     const iconSprite = KEY_SPRITE_ICONS.has(icon ?? '') ? keySprite : navSprite;
     return (
-      <KeyBtn
+      <KeyTooltip
         key={`${k.code}-${i}`}
-        $selected={val === currentValue}
-        $physical={Boolean(geometry)}
-        $keyWidth={geometry?.w}
-        $keyHeight={geometry?.h}
-        $x={geometry?.x}
-        $y={geometry?.y}
+        text={explanation}
+        selected={val === currentValue}
+        physical={Boolean(geometry)}
+        keyWidth={geometry?.w}
+        keyHeight={geometry?.h}
+        x={geometry?.x}
+        y={geometry?.y}
         onClick={() => onSelect(val)}
-        title={explanation}
       >
         {icon ? <svg aria-hidden="true"><use href={`${iconSprite}#${icon}`} /></svg> : <KeyLabel>{label}</KeyLabel>}
-      </KeyBtn>
+      </KeyTooltip>
     );
   };
 
@@ -516,7 +714,7 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
     <>
       <OptionListCart className="key-option-list-cart">
         {groups.map((g) => (
-          <NavBtnContent
+          <NavBtnItem
             key={g.id}
             $active={g.id === activeTab}
             onClick={() => setActiveTab(g.id)}
@@ -527,12 +725,12 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
                 <use href={`${navSprite}#${CATEGORY_ICONS[g.id] ?? 'SpecialCharacters'}`} />
               </svg>
             </NavBtnIcon>
-            <NavBtnInner>
+            <NavBtnContent>
               <NavBtnName $active={g.id === activeTab}>
                 {CATEGORY_LABELS[g.id] ?? g.label}
               </NavBtnName>
-            </NavBtnInner>
-          </NavBtnContent>
+            </NavBtnContent>
+          </NavBtnItem>
         ))}
         <SidebarSearchBox>
           <SearchIcon aria-hidden="true"><use href={`${navSprite}#search`} /></SearchIcon>

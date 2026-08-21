@@ -24,3 +24,5 @@ _legacy/
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*

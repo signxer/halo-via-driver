@@ -762,6 +762,17 @@ export class KeyboardAPI {
     const buffer = Array.from(await this.getByteBuffer());
     const bufferCommandBytes = buffer.slice(0, commandBytes.length - 1);
     logCommand(this.kbAddr, commandBytes, buffer);
+    // NuPhy Halo V2 returns 0xff, channel, command for an unregistered
+    // CUSTOM_MENU_GET_VALUE entry. Treat that as an unsupported optional
+    // menu instead of reporting a broken HID connection.
+    const isUnsupportedCustomMenu =
+      command === APICommand.CUSTOM_MENU_GET_VALUE &&
+      buffer[0] === 0xff &&
+      buffer[1] === bytes[0] &&
+      buffer[2] === bytes[1];
+    if (isUnsupportedCustomMenu) {
+      return [];
+    }
     if (!eqArr(commandBytes.slice(1), bufferCommandBytes)) {
       console.error(
         `Command for ${this.kbAddr}:`,

@@ -89,7 +89,8 @@ const TabItemLi = styled.li<{$active: boolean}>`
   height: 100%;
 
   &:hover {
-    color: var(--black-56);
+    /* 黑色主题下不能继续使用黑色透明度，否则文字会和深色背景融在一起。 */
+    color: var(--text-primary);
   }
 `;
 

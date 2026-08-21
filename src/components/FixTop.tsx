@@ -85,7 +85,7 @@ const RightRightBox = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.5rem;
   background: var(--surface-card);
   border-radius: 0.75rem;
   padding: 0.125rem;
@@ -96,6 +96,8 @@ const MBoxBac = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  align-self: stretch;
+  justify-content: center;
   gap: 0.375rem;
   background: var(--black-4);
   border-radius: 0.625rem;
@@ -110,13 +112,17 @@ const MBoxBac = styled.div`
 
 const MBox = styled.div`
   display: flex;
+  width: 2rem;
+  min-width: 2rem;
+  height: 1.0625rem;
+  align-items: center;
+  justify-content: center;
   font-size: 0.625rem;
   font-weight: 700;
   color: var(--white-100);
-  background: var(--black-86);
+  background: var(--button-black-l);
   border-radius: 0.375rem;
-  padding: 0 0.3125rem;
-  line-height: 1.15;
+  line-height: normal;
   p {
     margin: 0;
   }
@@ -138,8 +144,8 @@ const IconBtn = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.625rem;
-  height: 1.625rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 0.625rem;
   color: var(--text-black-l-title);
   cursor: pointer;
@@ -151,7 +157,7 @@ const IconBtn = styled.button`
     width: 1.25rem;
     height: 1.25rem;
     fill: currentColor;
-    stroke: currentColor;
+    stroke: none;
     overflow: visible;
   }
   .top-icon-MoreBox,
