@@ -165,6 +165,13 @@ const IconBtn = styled.button`
   }
   .top-icon-MoreBox,
   .top-icon-SettingGear { fill: none; }
+  svg.theme-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 `;
 
 const MoreMenu = styled.div`
@@ -389,8 +396,8 @@ const SunIcon: React.FC = () => (
 );
 
 const MoonIcon: React.FC = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M20.742 13.045A8.088 8.088 0 0 1 10.955 3.258 8.086 8.086 0 1 0 20.742 13.045Z" />
+  <svg className="theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M19.25 13.22a7.5 7.5 0 1 1-8.47-8.47 6.25 6.25 0 0 0 8.47 8.47Z" />
   </svg>
 );
 
