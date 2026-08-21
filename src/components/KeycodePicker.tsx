@@ -169,6 +169,7 @@ const NavBtnIcon = styled.div`
     fill: currentColor;
     color: inherit;
     &.macro-icon { fill: none; }
+    use { fill: currentColor; color: inherit; }
   }
 `;
 
@@ -412,7 +413,9 @@ const KeyBtn = styled.button<{
     width: 1.75rem;
     height: 1.75rem;
     fill: currentColor;
+    color: inherit;
     &.macro-icon { fill: none; }
+    use { fill: currentColor; color: inherit; }
   }
 `;
 
@@ -771,7 +774,11 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
         y={geometry?.y}
         onClick={() => onSelect(val)}
       >
-        {icon ? <svg aria-hidden="true"><use href={`${iconSprite}#${icon}`} /></svg> : fallbackGlyph ?? <KeyLabel>{label}</KeyLabel>}
+        {icon ? (
+          <svg aria-hidden="true" fill="currentColor" color="inherit">
+            <use href={`${iconSprite}#${icon}`} fill="currentColor" color="inherit" />
+          </svg>
+        ) : fallbackGlyph ?? <KeyLabel>{label}</KeyLabel>}
       </KeyTooltip>
     );
   };
@@ -788,8 +795,8 @@ export const KeycodePicker: React.FC<KeycodePickerProps> = ({
           >
             <NavBtnIcon>
               {g.id === 'macro' ? <MacroIcon /> : (
-                <svg>
-                  <use href={`${navSprite}#${CATEGORY_ICONS[g.id] ?? 'SpecialCharacters'}`} />
+                <svg fill="currentColor" color="inherit">
+                  <use href={`${navSprite}#${CATEGORY_ICONS[g.id] ?? 'SpecialCharacters'}`} fill="currentColor" color="inherit" />
                 </svg>
               )}
             </NavBtnIcon>
