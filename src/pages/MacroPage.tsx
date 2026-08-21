@@ -45,8 +45,10 @@ const Card = styled.div`
 
 const CardTitle = styled.h2`
   display: none;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: .875rem;
+  font-weight: 900;
+  line-height: normal;
+  color: var(--text-black-l-title);
   margin-bottom: 4px;
 `;
 
@@ -189,9 +191,10 @@ const EditorBindings = styled(EditorItem)`
 `;
 
 const MacroEditorTitle = styled.div`
-  font-size: .75rem;
-  font-weight: 700;
+  font-size: .875rem;
+  font-weight: 900;
   line-height: normal;
+  color: var(--text-black-l-title);
 `;
 
 const IntervalRow = styled.div`
@@ -218,8 +221,10 @@ const IntervalButtons = styled.div`
 `;
 
 const BindingTitle = styled.div`
-  font-size: .75rem;
-  font-weight: 700;
+  font-size: .875rem;
+  font-weight: 900;
+  line-height: normal;
+  color: var(--text-black-l-title);
 `;
 
 const BindingSlots = styled.div`
@@ -329,8 +334,9 @@ const Recorder = styled.div`
 `;
 
 const RecorderTitle = styled.div`
-  font-size: .75rem;
-  font-weight: 700;
+  font-size: .875rem;
+  font-weight: 900;
+  line-height: normal;
   color: var(--text-black-l-title);
   padding-bottom: .75rem;
 `;

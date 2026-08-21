@@ -145,8 +145,9 @@ const ZoneSwitch = styled.span<{$on: boolean}>`
 const SectionHeader = styled.div`
   height: 1.23rem;
   flex: 0 1 auto;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 900;
+  line-height: normal;
   color: var(--text-black-l-title);
   padding: 0;
 `;
@@ -224,28 +225,6 @@ const EffectName = styled.span<{$active: boolean}>`
   text-align: center;
   line-height: 1.2;
   white-space: nowrap;
-`;
-
-const GlobalLightToggle = styled.span<{$on: boolean}>`
-  display: block;
-  flex: none;
-  width: 3.125rem;
-  height: 1.875rem;
-  padding: .125rem;
-  box-sizing: border-box;
-  border: 0;
-  border-radius: 5rem;
-  background: ${(p) => (p.$on ? 'var(--other-switch-on)' : 'var(--other-switch-off)')};
-  cursor: pointer;
-  &::after {
-    content: '';
-    display: block;
-    width: 1.625rem;
-    height: 1.625rem;
-    border-radius: 50%;
-    background: var(--other-switch-circle);
-    transform: ${(p) => (p.$on ? 'translateX(1.375rem)' : 'translateX(0)')};
-  }
 `;
 
 // === 原版 lightConfigSettingCard 滑块 ===
@@ -789,7 +768,6 @@ export const LightingPage: React.FC = () => {
   }));
   const effectValue = effectChoices[effect]?.sourceIndex ?? effect;
   const offEffectValue = effectChoices.find(({name}) => /all off|off|关闭灯光/i.test(name))?.sourceIndex ?? 0;
-  const lightIsOn = effectValue !== offEffectValue;
   const showIfValues = effectItem ? {[effectItem.id]: effectValue} : {};
   const showSpeed = Boolean(speedItem && showIfMatches(speedItem, showIfValues));
   const showBrightness = Boolean(brightnessItem && showIfMatches(brightnessItem, showIfValues));
@@ -989,7 +967,7 @@ export const LightingPage: React.FC = () => {
 
         {effectItem && effectItem.options && (
           <EffectGrid>
-            {effectChoices.map(({sourceIndex, name}) => (
+            {effectChoices.filter(({sourceIndex}) => sourceIndex !== offEffectValue).map(({sourceIndex, name}) => (
               <EffectItem
                 key={`${name}-${sourceIndex}`}
                 $active={sourceIndex === effectValue}
@@ -1133,14 +1111,6 @@ export const LightingPage: React.FC = () => {
           <ColorPanel>
             <ColorHeader>
               <ColorTitle>自定义颜色</ColorTitle>
-              <GlobalLightToggle
-                className="global-light-toggle"
-                role="switch"
-                aria-label="关闭灯光"
-              aria-checked={lightIsOn}
-                $on={lightIsOn}
-                onClick={toggleZone}
-              />
             </ColorHeader>
             <ColorContent>
               <ColorPickerColumn>

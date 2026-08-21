@@ -281,9 +281,9 @@ const SectionHeader = styled.div`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.15;
+  font-size: 0.875rem;
+  font-weight: 900;
+  line-height: normal;
   color: var(--text-black-l-title);
 `;
 
