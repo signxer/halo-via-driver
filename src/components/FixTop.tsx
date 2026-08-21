@@ -145,8 +145,8 @@ const IconBtn = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.375rem;
-  height: 1.375rem;
+  width: 1.5rem;
+  height: 1.5rem;
   line-height: 0;
   border-radius: 0.625rem;
   color: var(--text-black-l-title);
@@ -157,8 +157,8 @@ const IconBtn = styled.button`
   }
   svg {
     display: block;
-    width: 1.375rem;
-    height: 1.375rem;
+    width: 1.5rem;
+    height: 1.5rem;
     fill: currentColor;
     stroke: none;
     overflow: visible;
@@ -173,8 +173,8 @@ const IconBtn = styled.button`
     stroke-linejoin: round;
   }
   svg.moon-icon {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.375rem;
+    height: 1.375rem;
   }
 `;
 
