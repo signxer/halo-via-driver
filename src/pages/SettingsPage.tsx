@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useNavigate} from 'react-router-dom';
 import {useKeyboardStore} from '../store/keyboard';
-import {useThemeStore} from '../store/theme';
 import {messages} from '../i18n';
 
 const Page = styled.div`
@@ -184,7 +183,6 @@ const CloseIcon = () => (
 
 export const SettingsPage: React.FC = () => {
   const {mode, api} = useKeyboardStore();
-  const {theme, toggleTheme} = useThemeStore();
   const navigate = useNavigate();
   const [confirmReset, setConfirmReset] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -213,23 +211,6 @@ export const SettingsPage: React.FC = () => {
         </Title>
 
         <SettingsGroups>
-          <Group>
-            <Row>
-              <div>
-                <h4>切换语言</h4>
-                <p>切换 NuPhyVIA 显示语言。</p>
-              </div>
-              <Pill disabled>简体中文⌄</Pill>
-            </Row>
-            <Row>
-              <div>
-                <h4>主题切换</h4>
-                <p>切换 NuPhyVIA 显示主题，支持亮色、暗色两种模式。</p>
-              </div>
-              <Pill onClick={toggleTheme}>{theme === 'dark' ? '暗色模式⌄' : '亮色模式⌄'}</Pill>
-            </Row>
-          </Group>
-
           <Group>
             <Row>
               <div>

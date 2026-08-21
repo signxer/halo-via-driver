@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import styled from 'styled-components';
 import {useNavigate} from 'react-router-dom';
 import {useKeyboardStore} from '../store/keyboard';
+import {useThemeStore} from '../store/theme';
 import navSprite from '../assets/nuphy/icons/nav-symbols.svg?url';
 import {messages} from '../i18n';
 
@@ -379,6 +380,12 @@ const SvgIcon: React.FC<{id: string}> = ({id}) => (
   </svg>
 );
 
+const ThemeIcon: React.FC = () => (
+  <svg viewBox="0 0 25 24" aria-hidden="true">
+    <path fillRule="evenodd" d="M12.18 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75M5.285 5.106a.75.75 0 0 1 1.061 0l1.591 1.59a.75.75 0 0 1-1.06 1.061l-1.592-1.59a.75.75 0 0 1 0-1.061m13.789 0a.75.75 0 0 1 0 1.06l-1.591 1.591a.75.75 0 1 1-1.06-1.06l1.59-1.591a.75.75 0 0 1 1.061 0M12.18 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6m-3.182-.182a4.5 4.5 0 1 1 6.364 6.364 4.5 4.5 0 0 1-6.364-6.364M2.43 12a.75.75 0 0 1 .75-.75h2.25a.75.75 0 0 1 0 1.5H3.18a.75.75 0 0 1-.75-.75m15.75 0a.75.75 0 0 1-.75-.75h2.25a.75.75 0 0 1 0 1.5h-2.25a.75.75 0 0 1-.75-.75M7.937 16.243a.75.75 0 0 1 0 1.06l-1.591 1.591a.75.75 0 1 1-1.06-1.06l1.59-1.591a.75.75 0 0 1 1.061 0m8.485 0a.75.75 0 0 1 1.061 0l1.591 1.59a.75.75 0 1 1-1.06 1.061l-1.592-1.59a.75.75 0 0 1 0-1.061M12.18 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25a.75.75 0 0 1 .75-.75" clipRule="evenodd" />
+  </svg>
+);
+
 const modeText: Record<string, string> = {
   connected: '已连接',
   demo: '演示模式',
@@ -388,6 +395,7 @@ const modeText: Record<string, string> = {
 export const FixTop: React.FC = () => {
   const {mode, connecting, connect, disconnect, error, profile, setProfile} =
     useKeyboardStore();
+  const {theme, toggleTheme} = useThemeStore();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [ioModal, setIoModal] = useState(false);
@@ -453,6 +461,14 @@ export const FixTop: React.FC = () => {
               </MoreMenu>
             )}
           </MoreWrap>
+
+          <IconBtn
+            title={theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
+            aria-label={theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
+            onClick={toggleTheme}
+          >
+            <ThemeIcon />
+          </IconBtn>
 
           <IconBtn
             title={messages.GlobalSettingsPage?.Settings ?? '设置'}
