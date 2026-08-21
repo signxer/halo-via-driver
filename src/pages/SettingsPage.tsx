@@ -14,18 +14,20 @@ const Page = styled.div`
 `;
 
 const Panel = styled.div`
-  width: 100%;
-  max-width: 70.5rem;
+  width: min(100%, 70.5rem);
   margin: 0 auto;
+  padding: .5rem;
+  box-sizing: border-box;
+  border-radius: 1.25rem;
+  background: var(--background-canvas);
 `;
 
 const Title = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .5rem 1rem 1rem;
-  background: var(--surface-card);
-  border-radius: 1rem 1rem 0 0;
+  padding: .25rem .5rem .75rem;
+  background: transparent;
   h3 {
     margin: 0;
     color: var(--text-black-l-title);
@@ -54,11 +56,12 @@ const SettingsGroups = styled.div`
   display: flex;
   flex-direction: column;
   gap: .5rem;
+  padding: 0 .25rem .25rem;
 `;
 
 const Group = styled.div`
   padding: .25rem .5rem;
-  border-radius: 1rem;
+  border-radius: .875rem;
   background: var(--surface-card);
   box-shadow: 0 .125rem .5rem var(--black-4);
 `;
