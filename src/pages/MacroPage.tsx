@@ -248,9 +248,12 @@ const RecorderRows = styled.div`
   color: var(--text-black-l-title);
 `;
 
+// 表头和数据行必须共用同一组列宽，否则“按键/状态/时间”等列会逐列错位。
+const RECORDER_GRID_COLUMNS = '2rem minmax(0, 1fr) 3rem 4rem 2rem 2rem';
+
 const RecorderRow = styled.div`
   display: grid;
-  grid-template-columns: 2rem 1fr 3rem 4rem 2rem 2rem;
+  grid-template-columns: ${RECORDER_GRID_COLUMNS};
   gap: .5rem;
   align-items: center;
   min-height: 1.5rem;
@@ -327,12 +330,13 @@ const RecorderTitle = styled.div`
 
 const RecorderHeaders = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.2fr 1fr 1fr;
+  grid-template-columns: ${RECORDER_GRID_COLUMNS};
   gap: .5rem;
   color: var(--text-black-l-title);
   font-size: .5625rem;
   text-align: center;
   padding: .75rem 0 .5rem;
+  box-sizing: border-box;
   min-width: 0;
   & > * {
     min-width: 0;
