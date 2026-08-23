@@ -1,10 +1,16 @@
-# NuPhy Halo V2 VIA Web Driver
+# NuPhyVIA
 
-基于 **VIA 协议 + WebHID** 的 NuPhy Halo 系列网页驱动，界面按照 NuPhy 官方驱动页面复刻，并支持以下三种键盘自动识别：
+基于 **VIA 协议 + WebHID** 的 NuPhy 系列网页驱动，界面按照 NuPhy 官方驱动页面复刻，并支持以下型号自动识别：
 
 - NuPhy Halo65 V2
 - NuPhy Halo75 V2
 - NuPhy Halo96 V2
+- NuPhy Kick75
+- NuPhy Nos75
+- NuPhy Gem80
+- NuPhy Air60 V2
+- NuPhy Air75 V2
+- NuPhy Air96 V2
 
 > **[直接使用在线驱动](https://nuphy.675277.xyz/)**（需连接键盘）
 >
@@ -13,7 +19,7 @@
 ## 功能
 
 - 通过 USB WebHID 连接真实键盘
-- 根据 USB VID/PID 自动识别 Halo65、Halo75 或 Halo96
+- 根据 USB VID/PID 自动识别支持的 NuPhy 键盘型号
 - 自动加载对应 VIA JSON、键盘矩阵、层数、键位布局和键盘底图
 - 按键定义：修改基础键、多媒体键、灯效键、特殊键和自定义键码
 - Mac / Windows Layer 切换
@@ -29,6 +35,12 @@
 | Halo65 V2 | `0x19F5` | `0x3315`，兼容官方 `0x102F` | [`halo65-v2.json`](public/definitions/halo65-v2.json) |
 | Halo75 V2 | `0x19F5` | `0x32F5` | [`halo75-v2.json`](public/definitions/halo75-v2.json) |
 | Halo96 V2 | `0x19F5` | `0x3302` | [`halo96-v2.json`](public/definitions/halo96-v2.json) |
+| Kick75 | `0x19F5` | `0x32D5` | [`kick75.json`](public/definitions/kick75.json) |
+| Nos75 | `0x19F5` | `0x3235` | [`nos75.json`](public/definitions/nos75.json) |
+| Gem80 | `0x19F5` | `0x3275` | [`gem80.json`](public/definitions/gem80.json) |
+| Air60 V2 | `0x19F5` | `0x3255` | [`air60-v2.json`](public/definitions/air60-v2.json) |
+| Air75 V2 | `0x19F5` | `0x3246` | [`air75-v2.json`](public/definitions/air75-v2.json) |
+| Air96 V2 | `0x19F5` | `0x3266` | [`air96-v2.json`](public/definitions/air96-v2.json) |
 
 连接时无需手动选择键盘型号。点击「授权连接」后，浏览器授权 WebHID 设备，驱动会根据 VID/PID 自动加载相应配置。已经授权过的设备在重新打开页面时会自动尝试连接。
 
@@ -43,8 +55,6 @@ Vercel 可以直接部署这个 Vite 项目：
    - Install Command：`npm ci`
    - Build Command：`npm run build`
    - Output Directory：`dist`
-
-4. 部署完成后，将 Vercel 地址写回本 README 的「在线体验」链接。
 
 在线体验必须使用 HTTPS，并建议使用最新版 Chrome 或 Edge，因为 WebHID 需要安全上下文。
 
@@ -72,6 +82,12 @@ npm run preview
 http://localhost:5173/?demo=1&device=halo65-v2#/pressKey
 http://localhost:5173/?demo=1&device=halo75-v2#/pressKey
 http://localhost:5173/?demo=1&device=halo96-v2#/pressKey
+http://localhost:5173/?demo=1&device=kick75#/pressKey
+http://localhost:5173/?demo=1&device=nos75#/pressKey
+http://localhost:5173/?demo=1&device=gem80#/pressKey
+http://localhost:5173/?demo=1&device=air60-v2#/pressKey
+http://localhost:5173/?demo=1&device=air75-v2#/pressKey
+http://localhost:5173/?demo=1&device=air96-v2#/pressKey
 ```
 
 演示模式中的修改只保存在浏览器内存中，不会写入真实键盘。
@@ -80,15 +96,15 @@ http://localhost:5173/?demo=1&device=halo96-v2#/pressKey
 
 ```text
 src/
-  models/index.ts             三种设备的型号注册、VID/PID 和底图配置
+  models/index.ts             支持设备的型号注册、VID/PID 和底图配置
   store/keyboard.ts           WebHID 连接、自动识别和 VIA 状态管理
   via/                        VIA 协议层
   pages/                      按键、灯效、宏和设置页面
   components/                 顶栏、键盘、键帽和键码选择器
   theme/                      NuPhy 风格主题变量
 public/
-  definitions/                三种设备的 VIA JSON
-  img/                        Halo65、Halo75、Halo96 底图资源
+  definitions/                支持设备的 VIA JSON
+  img/                        支持设备的键盘底图资源
 vercel.json                   Vercel 构建配置
 ```
 

@@ -140,7 +140,120 @@ export const HALO96_V2: ModelConfig = {
   kleLayout: HALO_LITE_KLE_LAYOUT,
 };
 
-export const MODELS: ModelConfig[] = [HALO65_V2, HALO75_V2, HALO96_V2];
+// ============================================================
+// 其他 NuPhy VIA 型号
+// 定义文件来自用户提供的 VIA JSON；底图优先复用仓库旧版驱动资源，
+// 对旧版中没有完全同名底图的型号使用同尺寸/相近布局作为预览底图。
+// ============================================================
+
+export const KICK75: ModelConfig = {
+  id: 'kick75',
+  name: 'NuPhy Kick75',
+  vendorId: 0x19f5,
+  productIds: [0x32d5],
+  definitionUrl: '/definitions/kick75.json',
+  layerCount: 8,
+  board: {
+    width: 60.3,
+    height: 26.3,
+    imageLight: '/img/kick75/kick75-empty1.webp',
+    imageDark: '/img/kick75/kick75-empty2.webp',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
+export const NOS75: ModelConfig = {
+  id: 'nos75',
+  name: 'NuPhy Nos75',
+  vendorId: 0x19f5,
+  productIds: [0x3235],
+  definitionUrl: '/definitions/nos75.json',
+  layerCount: 8,
+  board: {
+    width: 57.75,
+    height: 24.4,
+    imageLight: '/img/nos75/nos75-empty1.svg',
+    imageDark: '/img/nos75/nos75-empty2.svg',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
+export const GEM80: ModelConfig = {
+  id: 'gem80',
+  name: 'NuPhy Gem80',
+  vendorId: 0x19f5,
+  productIds: [0x3275],
+  definitionUrl: '/definitions/gem80.json',
+  layerCount: 8,
+  board: {
+    width: 65.65,
+    height: 26.45,
+    // 旧版资源没有 Gem80 专用空底图；使用无键位线的中性外壳，
+    // 避免把 WH80 的不同布局叠到 Gem80 上。
+    imageLight: '/img/gem80/gem80-empty1.svg',
+    imageDark: '/img/gem80/gem80-empty2.svg',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
+export const AIR60_V2: ModelConfig = {
+  id: 'air60-v2',
+  name: 'NuPhy Air60 V2',
+  vendorId: 0x19f5,
+  productIds: [0x3255],
+  definitionUrl: '/definitions/air60-v2.json',
+  layerCount: 8,
+  board: {
+    width: 54.45,
+    height: 19.85,
+    imageLight: '/img/air60-v2/air60-v2-empty1.webp',
+    imageDark: '/img/air60-v2/air60-v2-empty2.webp',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
+export const AIR75_V2: ModelConfig = {
+  id: 'air75-v2',
+  name: 'NuPhy Air75 V2',
+  vendorId: 0x19f5,
+  productIds: [0x3246],
+  definitionUrl: '/definitions/air75-v2.json',
+  layerCount: 8,
+  board: {
+    width: 57.75,
+    height: 24.4,
+    imageLight: '/img/air75-v2/air75-v2-empty1.webp',
+    imageDark: '/img/air75-v2/air75-v2-empty2.webp',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
+export const AIR96_V2: ModelConfig = {
+  id: 'air96-v2',
+  name: 'NuPhy Air96 V2',
+  vendorId: 0x19f5,
+  productIds: [0x3266],
+  definitionUrl: '/definitions/air96-v2.json',
+  layerCount: 8,
+  board: {
+    width: 68.78,
+    height: 24.2,
+    imageLight: '/img/halo96-lite/halo96-lite-empty1.webp',
+    imageDark: '/img/halo96-lite/halo96-lite-empty2.webp',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
+export const MODELS: ModelConfig[] = [
+  HALO65_V2, HALO75_V2, HALO96_V2,
+  KICK75, NOS75, GEM80, AIR60_V2, AIR75_V2, AIR96_V2,
+];
 
 // 当前激活型号(单型号产品;扩展时改成按设备/选择切换)
 export const ACTIVE_MODEL_ID: string = HALO65_V2.id;

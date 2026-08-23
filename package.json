@@ -1,5 +1,6 @@
 {
-  "name": "halo65-driver",
+  "name": "nuphy-via-driver",
+  "description": "NuPhy VIA Web Driver",
   "private": true,
   "version": "0.0.0",
   "type": "module",

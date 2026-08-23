@@ -84,6 +84,25 @@ const HALO96_WIN: DemoLayout = [
   ['KC_LCTL','KC_LGUI','KC_LALT','KC_SPC','KC_RALT','MO(3)','KC_LEFT','KC_DOWN','KC_RGHT','KC_P0','KC_PDOT'],
 ];
 
+// 新增型号没有把原版专用 keymap.c 一并提供，因此按各自 VIA KLE 行数
+// 生成一套可读的 ANSI/Mac 与 Windows 预览布局。连接真实键盘后仍以设备
+// 实际读取到的矩阵为准，不会把这些近似布局写入设备。
+const GENERIC_MAC_ROWS: DemoLayout = [
+  ['KC_ESC','KC_F1','KC_F2','KC_F3','KC_F4','KC_F5','KC_F6','KC_F7','KC_F8','KC_F9','KC_F10','KC_F11','KC_F12','KC_DEL','KC_HOME','KC_END','KC_PGUP','KC_PGDN','KC_INS'],
+  ['KC_GRV','KC_1','KC_2','KC_3','KC_4','KC_5','KC_6','KC_7','KC_8','KC_9','KC_0','KC_MINS','KC_EQL','KC_BSPC','KC_INS','KC_HOME','KC_END','KC_PGUP','KC_PGDN'],
+  ['KC_TAB','KC_Q','KC_W','KC_E','KC_R','KC_T','KC_Y','KC_U','KC_I','KC_O','KC_P','KC_LBRC','KC_RBRC','KC_BSLS','KC_P7','KC_P8','KC_P9','KC_PPLS'],
+  ['KC_CAPS','KC_A','KC_S','KC_D','KC_F','KC_G','KC_H','KC_J','KC_K','KC_L','KC_SCLN','KC_QUOT','KC_ENT','KC_P4','KC_P5','KC_P6'],
+  ['KC_LSFT','KC_Z','KC_X','KC_C','KC_V','KC_B','KC_N','KC_M','KC_COMM','KC_DOT','KC_SLSH','KC_RSFT','KC_UP','KC_P1','KC_P2','KC_P3','KC_PENT'],
+  ['KC_LCTL','KC_LOPT','KC_LCMD','KC_SPC','KC_RCMD','MO(1)','KC_LEFT','KC_DOWN','KC_RIGHT','KC_P0','KC_PDOT'],
+];
+
+const GENERIC_WIN_ROWS: DemoLayout = [
+  ['KC_ESC','KC_F1','KC_F2','KC_F3','KC_F4','KC_F5','KC_F6','KC_F7','KC_F8','KC_F9','KC_F10','KC_F11','KC_F12','KC_DEL','KC_HOME','KC_END','KC_PGUP','KC_PGDN','KC_INS'],
+  GENERIC_MAC_ROWS[1], GENERIC_MAC_ROWS[2], GENERIC_MAC_ROWS[3],
+  GENERIC_MAC_ROWS[4],
+  ['KC_LCTL','KC_LWIN','KC_LALT','KC_SPC','KC_RALT','MO(3)','KC_LEFT','KC_DOWN','KC_RIGHT','KC_P0','KC_PDOT'],
+];
+
 const DEMO_ALIASES: Record<string, string> = {
   KC_BRMD: 'KC_BRID', KC_BRMU: 'KC_BRIU', KC_SCRL: 'KC_SLCK', KC_PAUSE: 'KC_PAUS',
   KC_NUM: 'KC_NLCK', KC_RIGHT: 'KC_RGHT', KC_LWIN: 'KC_LGUI', KC_RWIN: 'KC_RGUI',
@@ -128,6 +147,29 @@ const applyOrderedDemoLayout = (
   });
 };
 
+const applyVisualDemoLayout = (
+  keymap: number[][],
+  layer: number,
+  layout: DemoLayout,
+  keys: KLEKey[],
+  cols: number,
+) => {
+  const rows: KLEKey[][] = [];
+  keys.forEach((key) => {
+    const y = Math.round(key.y * 100) / 100;
+    const row = rows.find((items) => items[0] && Math.abs(items[0].y - y) < 0.01);
+    if (row) row.push(key);
+    else rows.push([key]);
+  });
+  rows.forEach((row, rowIndex) => {
+    const codes = layout[rowIndex] ?? [];
+    row.forEach((key, index) => {
+      const code = codes[index] ?? 'KC_NO';
+      if (keymap[layer]) keymap[layer][key.row * cols + key.col] = demoKeycodeToByte(code);
+    });
+  });
+};
+
 const buildDemoKeymap = (
   rows: number,
   cols: number,
@@ -146,6 +188,12 @@ const buildDemoKeymap = (
     // 页面将 0–2 作为 Mac 层、3–5 作为 Windows 层；6–7 是固件保留层，
     // 不在页面中展示。把 QMK 的 Windows 基础层放到 Windows 组的首层。
     if (layerCount > 3) applyOrderedDemoLayout(keymap, 3, windows, keys, cols);
+    return keymap;
+  }
+
+  if (modelId !== 'halo65-v2') {
+    applyVisualDemoLayout(keymap, 0, GENERIC_MAC_ROWS, keys, cols);
+    if (layerCount > 3) applyVisualDemoLayout(keymap, 3, GENERIC_WIN_ROWS, keys, cols);
     return keymap;
   }
 
@@ -206,8 +254,8 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
 
   initDemo: async () => {
     try {
-      // 方便在没有实体键盘时逐个检查三种底图/布局：
-      // ?device=halo65-v2、?device=halo75-v2 或 ?device=halo96-v2。
+      // 方便在没有实体键盘时逐个检查各型号底图/布局，例如：
+      // ?device=halo65-v2、?device=kick75 或 ?device=air96-v2。
       const requestedId = typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('device')
         : null;
@@ -224,7 +272,7 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
         mode: 'demo',
         keymap,
         layerCount,
-        protocolVersion: 12, // Halo65 V2 固件 VIA_PROTOCOL_VERSION = 0x000C
+        protocolVersion: 12, // NuPhy VIA 预览使用的基础协议版本
         profile: 'mac',
         api: null,
         deviceName: null,
@@ -239,12 +287,12 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
     set({connecting: true, error: null});
     try {
       // 先请求所有 VIA HID 设备，再根据 VID/PID 自动选择对应型号。
-      // 这样同一页面可以连接 Halo65、Halo75 或 Halo96，不需要手动切换型号。
+      // 这样同一页面可以连接所有已注册型号，不需要手动切换型号。
       const devices = await HID.devices(true);
       const device = devices.find((d) => Boolean(getModelForDevice(d.vendorId, d.productId)));
       const model = device ? getModelForDevice(device.vendorId, device.productId) : undefined;
       if (!device || !model) {
-        throw new Error('未找到支持的 Halo65 / Halo75 / Halo96 键盘,请确认已通过 USB 连接并切到有线模式');
+        throw new Error('未找到支持的 NuPhy 键盘,请确认已通过 USB 连接并切到有线模式');
       }
       const loaded = await createApiAndLoad(model, device.path);
       set({
