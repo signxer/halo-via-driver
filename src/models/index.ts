@@ -46,6 +46,36 @@ const HALO_LITE_KLE_LAYOUT = {
   unitY: 3.4795,
 };
 
+// 这些型号的 KLE 仍然来自官方 VIA 定义，但键盘外壳的留白不同，
+// 不能把 Halo65 的左上角原点直接套过来。
+const KICK75_KLE_LAYOUT = {
+  originX: 2.0,
+  originY: 2.3754,
+  unitX: 3.4795,
+  unitY: 3.4795,
+};
+
+const AIR60_V2_KLE_LAYOUT = {
+  originX: 1.0,
+  originY: 1.27,
+  unitX: 3.4795,
+  unitY: 3.4795,
+};
+
+const NOS75_KLE_LAYOUT = {
+  originX: 1.3717,
+  originY: 1.25,
+  unitX: 3.4795,
+  unitY: 3.4795,
+};
+
+const AIR96_V2_KLE_LAYOUT = {
+  originX: 1.3717,
+  originY: 1.6,
+  unitX: 3.4795,
+  unitY: 3.4795,
+};
+
 // ============================================================
 // Halo65 V2 (QMK + VIA, VID 0x19F5 / PID 0x3315)
 // 底图来自原版驱动 Halo65 Lite 系列(white/black 两色)
@@ -165,7 +195,7 @@ export const KICK75: ModelConfig = {
     imageDark: '/img/kick75/kick75-empty2.webp',
   },
   keyLayout: [],
-  kleLayout: HALO_LITE_KLE_LAYOUT,
+  kleLayout: KICK75_KLE_LAYOUT,
 };
 
 export const NOS75: ModelConfig = {
@@ -183,7 +213,7 @@ export const NOS75: ModelConfig = {
     imageDark: '/img/nos75/nos75-empty2.svg',
   },
   keyLayout: [],
-  kleLayout: HALO_LITE_KLE_LAYOUT,
+  kleLayout: NOS75_KLE_LAYOUT,
 };
 
 export const GEM80: ModelConfig = {
@@ -221,7 +251,7 @@ export const AIR60_V2: ModelConfig = {
     imageDark: '/img/air60-v2/air60-v2-empty2.webp',
   },
   keyLayout: [],
-  kleLayout: HALO_LITE_KLE_LAYOUT,
+  kleLayout: AIR60_V2_KLE_LAYOUT,
 };
 
 export const AIR75_V2: ModelConfig = {
@@ -253,11 +283,11 @@ export const AIR96_V2: ModelConfig = {
   board: {
     width: 68.78,
     height: 24.2,
-    imageLight: '/img/halo96-lite/halo96-lite-empty1.webp',
-    imageDark: '/img/halo96-lite/halo96-lite-empty2.webp',
+    imageLight: '/img/air96-v2/air96-v2-empty1.svg',
+    imageDark: '/img/air96-v2/air96-v2-empty2.svg',
   },
   keyLayout: [],
-  kleLayout: HALO_LITE_KLE_LAYOUT,
+  kleLayout: AIR96_V2_KLE_LAYOUT,
 };
 
 export const MODELS: ModelConfig[] = [

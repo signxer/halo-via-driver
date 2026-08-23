@@ -93,15 +93,24 @@ const LightingFace = styled.div`
   pointer-events: none;
 `;
 
-const WireframeBac = styled.div<{$baseWidth: number}>`
-  width: 100%;
-  height: 100%;
+const WireframeBac = styled.div<{
+  $baseWidth: number;
+  $baseHeight: number;
+  $vertical: boolean;
+}>`
+  width: ${(p) => p.$vertical ? `${p.$baseHeight}rem` : '100%'};
+  height: ${(p) => p.$vertical ? `${p.$baseWidth}rem` : '100%'};
   display: flex;
   justify-content: space-between;
   position: absolute;
   align-items: center;
   z-index: 1;
   pointer-events: none;
+  ${(p) => p.$vertical && css`
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+  `}
   > div:first-child,
   > div:last-child {
     /* NuPhy source: each side is keyWidth / 2.6. The middle piece is
@@ -189,7 +198,13 @@ export const KeyCap: React.FC<KeyCapProps> = ({
       {activeColor && <LightingGlow style={{'--lighting-color': activeColor} as React.CSSProperties} />}
       {activeColor && <LightingFace />}
       <div style={{width: '100%', height: '100%'}}>
-        <WireframeBac className="wireframeBac" $baseWidth={CAP_UNIT * unitScale}>
+        <WireframeBac
+          className="wireframeBac"
+          // 横向宽键仍只扩大中段；左右两片保持一个物理键宽。
+          $baseWidth={CAP_UNIT * unitScale}
+          $baseHeight={h * CAP_UNIT}
+          $vertical={h > w}
+        >
           <MaskSeg image={VectorLeft} color={activeColor} />
           <MaskSeg image={VectorMiddle} color={activeColor} />
           <MaskSeg image={VectorRight} color={activeColor} />
