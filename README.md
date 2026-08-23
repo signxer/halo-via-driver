@@ -6,7 +6,9 @@
 - NuPhy Halo75 V2
 - NuPhy Halo96 V2
 
-> **[打开在线驱动 DEMO](https://nuphy.675277.xyz/?demo=1)**
+> **[直接使用在线驱动](https://nuphy.675277.xyz/)**（需连接键盘）
+>
+> **[打开无键盘预览](https://nuphy.675277.xyz/?demo=1)**
 
 ## 功能
 
