@@ -6,9 +6,7 @@
 - NuPhy Halo75 V2
 - NuPhy Halo96 V2
 
-> 在线体验：部署到 Vercel 后，将下面的地址替换为实际部署地址。
->
-> **[打开在线驱动 DEMO](https://nuphy-driver-vercel.vercel.app/?demo=1)**
+> **[打开在线驱动 DEMO](https://nuphy.675277.xyz/?demo=1)**
 
 ## 功能
 

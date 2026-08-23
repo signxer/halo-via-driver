@@ -37,6 +37,8 @@ const Card = styled.div`
   position: fixed;
   left: 2.05rem;
   right: 2.05rem;
+  max-width: 112.5rem;
+  margin: 0 auto;
   bottom: 0.5rem;
   background: var(--surface-page);
   border-radius: 1.5rem;
