@@ -55,6 +55,54 @@ const KICK75_KLE_LAYOUT = {
   unitY: 3.4795,
 };
 
+// Kick75 原版驱动的实际坐标。VIA KLE 只保存近似行列关系，原版这里还
+// 包含 1.26/1.79/2.31 等非整数宽度和真实的纵向行距，直接保留才能与
+// Kick75_empty 底图重合。
+const kick75SourceKey = (x: number, y: number, w = 1, h = 1): KeyPosition => [
+  KICK75_KLE_LAYOUT.originX + x * KICK75_KLE_LAYOUT.unitX,
+  KICK75_KLE_LAYOUT.originY + y * KICK75_KLE_LAYOUT.unitY,
+  w,
+  h,
+];
+
+const KICK75_KEY_LAYOUT: KeyPosition[] = [
+  // Row 0
+  kick75SourceKey(0, 0), kick75SourceKey(1.26, 0), kick75SourceKey(2.26, 0),
+  kick75SourceKey(3.26, 0), kick75SourceKey(4.26, 0), kick75SourceKey(5.52, 0),
+  kick75SourceKey(6.52, 0), kick75SourceKey(7.52, 0), kick75SourceKey(8.52, 0),
+  kick75SourceKey(9.8, 0), kick75SourceKey(10.8, 0), kick75SourceKey(11.8, 0),
+  kick75SourceKey(12.8, 0), kick75SourceKey(14.06, 0), kick75SourceKey(15.32, 0),
+  // Row 1
+  kick75SourceKey(0, 1.28), kick75SourceKey(1, 1.28), kick75SourceKey(2, 1.28),
+  kick75SourceKey(3, 1.28), kick75SourceKey(4, 1.28), kick75SourceKey(5, 1.28),
+  kick75SourceKey(6, 1.28), kick75SourceKey(7, 1.28), kick75SourceKey(8, 1.28),
+  kick75SourceKey(9, 1.28), kick75SourceKey(10, 1.28), kick75SourceKey(11, 1.28),
+  kick75SourceKey(12, 1.28), kick75SourceKey(13, 1.28, 2.06), kick75SourceKey(15.32, 1.28),
+  // Row 2
+  kick75SourceKey(0, 2.32, 1.52), kick75SourceKey(1.52, 2.32), kick75SourceKey(2.52, 2.32),
+  kick75SourceKey(3.52, 2.32), kick75SourceKey(4.52, 2.32), kick75SourceKey(5.52, 2.32),
+  kick75SourceKey(6.52, 2.32), kick75SourceKey(7.52, 2.32), kick75SourceKey(8.52, 2.32),
+  kick75SourceKey(9.52, 2.32), kick75SourceKey(10.52, 2.32), kick75SourceKey(11.52, 2.32),
+  kick75SourceKey(12.52, 2.32), kick75SourceKey(13.52, 2.32, 1.54), kick75SourceKey(15.32, 2.32),
+  // Row 3
+  kick75SourceKey(0, 3.35, 1.79), kick75SourceKey(1.79, 3.35), kick75SourceKey(2.79, 3.35),
+  kick75SourceKey(3.79, 3.35), kick75SourceKey(4.79, 3.35), kick75SourceKey(5.79, 3.35),
+  kick75SourceKey(6.79, 3.35), kick75SourceKey(7.79, 3.35), kick75SourceKey(8.79, 3.35),
+  kick75SourceKey(9.79, 3.35), kick75SourceKey(10.79, 3.35), kick75SourceKey(11.79, 3.35),
+  kick75SourceKey(12.79, 3.35, 2.31), kick75SourceKey(15.36, 3.35),
+  // Row 4
+  kick75SourceKey(0, 4.39, 2.28), kick75SourceKey(2.28, 4.39), kick75SourceKey(3.28, 4.39),
+  kick75SourceKey(4.28, 4.39), kick75SourceKey(5.28, 4.39), kick75SourceKey(6.28, 4.39),
+  kick75SourceKey(7.28, 4.39), kick75SourceKey(8.28, 4.39), kick75SourceKey(9.28, 4.39),
+  kick75SourceKey(10.28, 4.39), kick75SourceKey(11.28, 4.39), kick75SourceKey(12.28, 4.39, 1.82),
+  kick75SourceKey(14.1, 4.39),
+  // Row 5
+  kick75SourceKey(0, 5.43, 1.26), kick75SourceKey(1.26, 5.43, 1.26),
+  kick75SourceKey(2.52, 5.43, 1.26), kick75SourceKey(3.78, 5.43, 6.45),
+  kick75SourceKey(10.22, 5.43, 1.26), kick75SourceKey(11.48, 5.43, 1.26),
+  kick75SourceKey(13.3, 5.43), kick75SourceKey(14.3, 5.43), kick75SourceKey(15.32, 5.43),
+];
+
 const AIR60_V2_KLE_LAYOUT = {
   originX: 1.0,
   originY: 1.27,
@@ -63,8 +111,15 @@ const AIR60_V2_KLE_LAYOUT = {
 };
 
 const NOS75_KLE_LAYOUT = {
-  originX: 1.3717,
-  originY: 1.25,
+  originX: 1.1,
+  originY: 1.2,
+  unitX: 3.4795,
+  unitY: 3.4795,
+};
+
+const GEM80_KLE_LAYOUT = {
+  originX: 1.35,
+  originY: 2.4,
   unitX: 3.4795,
   unitY: 3.4795,
 };
@@ -194,7 +249,7 @@ export const KICK75: ModelConfig = {
     imageLight: '/img/kick75/kick75-empty1.webp',
     imageDark: '/img/kick75/kick75-empty2.webp',
   },
-  keyLayout: [],
+  keyLayout: KICK75_KEY_LAYOUT,
   kleLayout: KICK75_KLE_LAYOUT,
 };
 
@@ -207,8 +262,8 @@ export const NOS75: ModelConfig = {
   layerCount: 8,
   previewImage: '/img/demo-keyboards/nos75.jpg',
   board: {
-    width: 57.75,
-    height: 24.4,
+    width: 58.3,
+    height: 24.0,
     imageLight: '/img/nos75/nos75-empty1.svg',
     imageDark: '/img/nos75/nos75-empty2.svg',
   },
@@ -225,15 +280,15 @@ export const GEM80: ModelConfig = {
   layerCount: 8,
   previewImage: '/img/demo-keyboards/gem80.jpg',
   board: {
-    width: 65.65,
-    height: 26.45,
-    // 旧版资源没有 Gem80 专用空底图；使用无键位线的中性外壳，
-    // 避免把 WH80 的不同布局叠到 Gem80 上。
+    width: 66.2,
+    height: 26.1,
+    // 旧版资源没有 Gem80 专用空底图；这里保留官方风格的细线外壳，
+    // 但不把 WH80 的不同键位布局叠到 Gem80 上。
     imageLight: '/img/gem80/gem80-empty1.svg',
     imageDark: '/img/gem80/gem80-empty2.svg',
   },
   keyLayout: [],
-  kleLayout: HALO_LITE_KLE_LAYOUT,
+  kleLayout: GEM80_KLE_LAYOUT,
 };
 
 export const AIR60_V2: ModelConfig = {

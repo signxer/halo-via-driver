@@ -38,7 +38,12 @@ export function parseKLE(keymap: KLEItem[][]): KLEKey[] {
         return;
       }
       if (typeof item === 'string') {
-        const [r, c] = item.split(',').map(Number);
+        // 官方 VIA KLE 字符串有时会在矩阵坐标后附带 QMK 注释，
+        // 例如 "0,16\\n...e0"；只取前面的坐标，避免得到 NaN。
+        const match = /^\\s*(-?\\d+)\\s*,\\s*(-?\\d+)/.exec(item);
+        if (!match) return;
+        const r = Number(match[1]);
+        const c = Number(match[2]);
         keys.push({
           row: r,
           col: c,
