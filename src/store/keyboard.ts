@@ -29,7 +29,7 @@ type KeyboardState = {
   keymap: number[][];
 
   // actions
-  initDemo: () => Promise<void>;
+  initDemo: (modelId?: string) => Promise<void>;
   connect: () => Promise<void>;
   tryAutoConnect: () => Promise<boolean>;
   disconnect: () => Promise<void>;
@@ -252,13 +252,13 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
   profile: 'mac',
   keymap: [],
 
-  initDemo: async () => {
+  initDemo: async (modelId?: string) => {
     try {
       // 方便在没有实体键盘时逐个检查各型号底图/布局，例如：
       // ?device=halo65-v2、?device=kick75 或 ?device=air96-v2。
-      const requestedId = typeof window !== 'undefined'
+      const requestedId = modelId ?? (typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('device')
-        : null;
+        : null);
       const model = (requestedId ? getModel(requestedId) : undefined) ?? get().model;
       const definition = await loadDefinition(model);
       const keys = parseKLE(definition.layouts.keymap);

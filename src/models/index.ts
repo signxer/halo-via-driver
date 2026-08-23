@@ -19,6 +19,7 @@ export type ModelConfig = {
   productIds: number[]; // USB productId(十进制),支持同型号不同固件
   definitionUrl: string; // public 下的 VIA 定义 JSON
   layerCount: number; // 固件 dynamic_keymap.layer_count
+  previewImage?: string; // 演示型号选择器中的官方产品图
   board: {
     width: number; // rem
     height: number; // rem
@@ -90,6 +91,7 @@ export const HALO65_V2: ModelConfig = {
   productIds: [0x3315, 0x102f],
   definitionUrl: '/definitions/halo65-v2.json',
   layerCount: 8, // 固件 dynamic_keymap.layer_count
+  previewImage: '/img/demo-keyboards/halo65-v2.png',
   board: {
     width: 58.125,
     height: 20.9711,
@@ -109,6 +111,7 @@ export const HALO75_V2: ModelConfig = {
   productIds: [0x32f5],
   definitionUrl: '/definitions/halo75-v2.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/halo75-v2.png',
   board: {
     width: 58.125,
     height: 24.4307,
@@ -128,6 +131,7 @@ export const HALO96_V2: ModelConfig = {
   productIds: [0x3302],
   definitionUrl: '/definitions/halo96-v2.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/halo96-v2.png',
   board: {
     width: 68.7813,
     height: 24.5215,
@@ -153,6 +157,7 @@ export const KICK75: ModelConfig = {
   productIds: [0x32d5],
   definitionUrl: '/definitions/kick75.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/kick75.png',
   board: {
     width: 60.3,
     height: 26.3,
@@ -170,6 +175,7 @@ export const NOS75: ModelConfig = {
   productIds: [0x3235],
   definitionUrl: '/definitions/nos75.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/nos75.jpg',
   board: {
     width: 57.75,
     height: 24.4,
@@ -187,6 +193,7 @@ export const GEM80: ModelConfig = {
   productIds: [0x3275],
   definitionUrl: '/definitions/gem80.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/gem80.jpg',
   board: {
     width: 65.65,
     height: 26.45,
@@ -206,6 +213,7 @@ export const AIR60_V2: ModelConfig = {
   productIds: [0x3255],
   definitionUrl: '/definitions/air60-v2.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/air60-v2.jpg',
   board: {
     width: 54.45,
     height: 19.85,
@@ -223,6 +231,7 @@ export const AIR75_V2: ModelConfig = {
   productIds: [0x3246],
   definitionUrl: '/definitions/air75-v2.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/air75-v2.png',
   board: {
     width: 57.75,
     height: 24.4,
@@ -240,6 +249,7 @@ export const AIR96_V2: ModelConfig = {
   productIds: [0x3266],
   definitionUrl: '/definitions/air96-v2.json',
   layerCount: 8,
+  previewImage: '/img/demo-keyboards/air96-v2.jpg',
   board: {
     width: 68.78,
     height: 24.2,

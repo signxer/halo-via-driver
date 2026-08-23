@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import {useNavigate} from 'react-router-dom';
 import {useKeyboardStore} from '../store/keyboard';
 import {useThemeStore} from '../store/theme';
+import {MODELS} from '../models';
 import navSprite from '../assets/nuphy/icons/nav-symbols.svg?url';
 import {messages} from '../i18n';
 
@@ -214,6 +215,109 @@ const MoreWrap = styled.div`
   position: relative;
 `;
 
+const DemoPickerTrigger = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 1.75rem;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--surface-card);
+  box-shadow: 0 1px 6px var(--black-8);
+  color: var(--text-black-l-title);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: var(--surface-hover); }
+  .demo-label { color: #ff9500; font-size: 0.625rem; }
+  .demo-name { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-chevron { font-size: 0.75rem; line-height: 1; }
+`;
+
+const DemoPickerOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: auto;
+  padding: 4rem 1rem 1.5rem;
+  background: var(--backgroundColorMask);
+  backdrop-filter: blur(0.375rem);
+`;
+
+const DemoPickerPanel = styled.div`
+  width: min(64rem, 100%);
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: var(--background-canvas-overlay);
+  border-radius: 1.25rem;
+  box-shadow: 0 1rem 3rem var(--black-32);
+`;
+
+const DemoPickerHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-black-l-title);
+  .title { font-size: 1rem; font-weight: 800; }
+  .description { margin-top: 0.25rem; color: var(--text-black-s-content); font-size: 0.6875rem; }
+`;
+
+const DemoPickerClose = styled.button`
+  display: flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0.625rem;
+  background: var(--black-4);
+  color: var(--text-black-l-title);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+`;
+
+const DemoPickerGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.625rem;
+`;
+
+const DemoPickerCard = styled.button<{$active: boolean}>`
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 0.125rem solid ${(p) => (p.$active ? 'var(--theme-color)' : 'transparent')};
+  border-radius: 0.875rem;
+  background: var(--surface-card);
+  color: var(--text-black-l-title);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  &:hover { transform: translateY(-0.125rem); box-shadow: 0 0.375rem 1rem var(--black-12); }
+  &:disabled { cursor: wait; opacity: 0.65; }
+  .image-wrap {
+    display: flex;
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 0.625rem;
+    background: #f5f5f5;
+  }
+  img { width: 100%; height: 100%; object-fit: contain; }
+  .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.75rem; font-weight: 800; }
+  .id { color: var(--text-black-s-content); font-size: 0.625rem; }
+`;
+
 const ProfileOverlay = styled.div`
   position: fixed;
   z-index: 50;
@@ -416,13 +520,29 @@ const modeText: Record<string, string> = {
 };
 
 export const FixTop: React.FC = () => {
-  const {mode, connecting, connect, disconnect, error, profile, setProfile} =
+  const {mode, connecting, connect, disconnect, error, profile, setProfile, model, initDemo} =
     useKeyboardStore();
   const {theme, toggleTheme} = useThemeStore();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [ioModal, setIoModal] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [demoPickerOpen, setDemoPickerOpen] = useState(false);
+  const [demoSwitching, setDemoSwitching] = useState(false);
+
+  const selectDemoModel = async (modelId: string) => {
+    setDemoSwitching(true);
+    const url = new URL(window.location.href);
+    url.searchParams.set('demo', '1');
+    url.searchParams.set('device', modelId);
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    try {
+      await initDemo(modelId);
+      setDemoPickerOpen(false);
+    } finally {
+      setDemoSwitching(false);
+    }
+  };
 
   const name = profile === 'windows' ? 'Windows' : 'Mac';
   const modeBadge = profile === 'windows' ? 'M2' : 'M1';
@@ -431,6 +551,18 @@ export const FixTop: React.FC = () => {
     <FixTopBar className="fixTop">
       <LeftBox className="leftBox" />
       <Right className="right">
+        {mode === 'demo' && (
+          <DemoPickerTrigger
+            type="button"
+            onClick={() => setDemoPickerOpen(true)}
+            title="选择演示键盘"
+            aria-expanded={demoPickerOpen}
+          >
+            <span className="demo-label">演示</span>
+            <span className="demo-name">{model.name.replace(/^NuPhy\s+/, '')}</span>
+            <span className="demo-chevron">⌄</span>
+          </DemoPickerTrigger>
+        )}
         {/* NuPhy 的正常设备页不显示演示状态；仅在真实连接/错误时保留反馈。 */}
         {(connecting || error || mode !== 'demo') && (
           <ColoursLoadingBac className="coloursLoadingBac">
@@ -501,6 +633,45 @@ export const FixTop: React.FC = () => {
           </IconBtn>
         </RightRightBox>
       </Right>
+
+      {demoPickerOpen && (
+        <DemoPickerOverlay onClick={() => !demoSwitching && setDemoPickerOpen(false)}>
+          <DemoPickerPanel onClick={(e) => e.stopPropagation()}>
+            <DemoPickerHeader>
+              <div>
+                <div className="title">选择演示键盘</div>
+                <div className="description">切换型号后会同步加载对应的 VIA 定义、KLE 键位和键盘底图。</div>
+              </div>
+              <DemoPickerClose
+                type="button"
+                aria-label="关闭型号选择"
+                onClick={() => setDemoPickerOpen(false)}
+                disabled={demoSwitching}
+              >
+                ×
+              </DemoPickerClose>
+            </DemoPickerHeader>
+            <DemoPickerGrid>
+              {MODELS.map((demoModel) => (
+                <DemoPickerCard
+                  key={demoModel.id}
+                  type="button"
+                  $active={demoModel.id === model.id}
+                  disabled={demoSwitching}
+                  onClick={() => void selectDemoModel(demoModel.id)}
+                  aria-label={`选择 ${demoModel.name}`}
+                >
+                  <span className="image-wrap">
+                    <img src={demoModel.previewImage ?? demoModel.board.imageLight} alt="" />
+                  </span>
+                  <span className="name">{demoModel.name.replace(/^NuPhy\s+/, '')}</span>
+                  <span className="id">{demoModel.id}</span>
+                </DemoPickerCard>
+              ))}
+            </DemoPickerGrid>
+          </DemoPickerPanel>
+        </DemoPickerOverlay>
+      )}
 
       {profileOpen && (
         <ProfileOverlay aria-label="我的配置">
