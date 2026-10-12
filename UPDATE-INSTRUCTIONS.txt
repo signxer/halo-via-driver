@@ -1,0 +1,3 @@
+本版本是完整项目。解压到新文件夹，在目录中运行 npm ci 和 npm run dev。
+浏览器进入 ?demo=1&device=rainy75-wob#/pressKey。
+具体功能、协议依据、备份和实机测试步骤见 RAINY75_DRIVER.md。

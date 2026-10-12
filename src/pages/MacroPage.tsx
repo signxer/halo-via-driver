@@ -1,3 +1,4 @@
+import {RainyMacroPanel} from '../wob/RainyMacroPanel';
 import React, {useEffect, useState, useCallback, useRef} from 'react';
 import styled from 'styled-components';
 import {NavTabs} from '../components/NavTabs';
@@ -375,7 +376,7 @@ function sequenceToText(seq: RawKeycodeSequence | undefined): string {
 const sequenceToCode = (sequence: RawKeycodeSequence | undefined): string =>
   sequenceToExpression(rawSequenceToOptimizedSequence(sequence ?? []));
 
-export const MacroPage: React.FC = () => {
+const ViaMacroPage: React.FC = () => {
   const {mode, api, protocolVersion, initDemo} = useKeyboardStore();
 
   const [macros, setMacros] = useState<RawKeycodeSequence[]>([]);
@@ -571,4 +572,9 @@ export const MacroPage: React.FC = () => {
       </Card>
     </Page>
   );
+};
+
+export const MacroPage: React.FC = () => {
+ const model=useKeyboardStore(state=>state.model);
+ return model.id==='rainy75-wob'?<><RainyMacroPanel /><PageNav><NavTabs /></PageNav></>:<ViaMacroPage />;
 };

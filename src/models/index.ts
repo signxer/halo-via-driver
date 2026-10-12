@@ -345,9 +345,28 @@ export const AIR96_V2: ModelConfig = {
   kleLayout: AIR96_V2_KLE_LAYOUT,
 };
 
+// Rainy 75 WOB RGB firmware: preview-only until its proprietary keymap protocol is implemented.
+// The matrix and KLE definition are temporary visualization placeholders, NOT verified hardware mapping.
+export const RAINY75_WOB: ModelConfig = {
+  id: 'rainy75-wob',
+  name: 'WOBKEY Rainy 75 RGB (Preview)',
+  vendorId: 0x320f,
+  productIds: [0x5055],
+  definitionUrl: '/definitions/rainy75-wob.json',
+  layerCount: 4, // Preview placeholder, not verified on WOB firmware
+  board: {
+    width: 58.125,
+    height: 24.4307,
+    imageLight: '/img/rainy75-wob/rainy75-outline.svg',
+    imageDark: '/img/rainy75-wob/rainy75-outline.svg',
+  },
+  keyLayout: [],
+  kleLayout: HALO_LITE_KLE_LAYOUT,
+};
+
 export const MODELS: ModelConfig[] = [
   HALO65_V2, HALO75_V2, HALO96_V2,
-  KICK75, NOS75, GEM80, AIR60_V2, AIR75_V2, AIR96_V2,
+  KICK75, NOS75, GEM80, AIR60_V2, AIR75_V2, AIR96_V2, RAINY75_WOB,
 ];
 
 // 当前激活型号(单型号产品;扩展时改成按设备/选择切换)

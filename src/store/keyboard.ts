@@ -286,14 +286,20 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
   connect: async () => {
     set({connecting: true, error: null});
     try {
+      // WOB firmware uses a proprietary HID interface, not VIA. Never send VIA packets to it.
+      // This alpha supports safe preview only; choose demo mode for Rainy 75.
+      if (get().model.id === 'rainy75-wob') {
+        throw new Error('Rainy 75 WOB: VIA hardware connection is disabled in this alpha. Use the Rainy 75 preview link; proprietary HID support is not yet integrated.');
+      }
       // 先请求所有 VIA HID 设备，再根据 VID/PID 自动选择对应型号。
       // 这样同一页面可以连接所有已注册型号，不需要手动切换型号。
       const devices = await HID.devices(true);
       const device = devices.find((d) => Boolean(getModelForDevice(d.vendorId, d.productId)));
       const model = device ? getModelForDevice(device.vendorId, device.productId) : undefined;
       if (!device || !model) {
-        throw new Error('未找到支持的 NuPhy 键盘,请确认已通过 USB 连接并切到有线模式');
+        throw new Error('No supported VIA keyboard found. Rainy 75 WOB is currently preview-only; open ?demo=1&device=rainy75-wob.');
       }
+      if (model.id === 'rainy75-wob') throw new Error('WOB protocol is not VIA; hardware writes are disabled.');
       const loaded = await createApiAndLoad(model, device.path);
       set({
         mode: 'connected',
@@ -323,6 +329,7 @@ export const useKeyboardStore = create<KeyboardState>((set, get) => ({
       const device = devices.find((d) => Boolean(getModelForDevice(d.vendorId, d.productId)));
       const model = device ? getModelForDevice(device.vendorId, device.productId) : undefined;
       if (!device || !model) return false;
+      if (model.id === 'rainy75-wob') throw new Error('WOB protocol is not VIA; hardware writes are disabled.');
       const loaded = await createApiAndLoad(model, device.path);
       set({
         mode: 'connected',

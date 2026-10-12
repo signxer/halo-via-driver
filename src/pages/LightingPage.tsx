@@ -1,3 +1,4 @@
+import {RainyHardwarePanel} from '../wob/RainyHardwarePanel';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import styled from 'styled-components';
 import {NavTabs} from '../components/NavTabs';
@@ -752,6 +753,11 @@ const directionGlyph = (label: string, index: number): string => {
 };
 
 export const LightingPage: React.FC = () => {
+  const rainyModel = useKeyboardStore(state => state.model.id === 'rainy75-wob');
+  return rainyModel ? <RainyHardwarePanel /> : <ViaLightingPage />;
+};
+
+const ViaLightingPage: React.FC = () => {
   const {mode, api, definition, initDemo} = useKeyboardStore();
   const zones = useMemo(() => {
     const parsed = parseLightingMenus(definition);

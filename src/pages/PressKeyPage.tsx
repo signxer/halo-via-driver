@@ -1,3 +1,4 @@
+import {RainyKeymapReader} from '../wob/RainyKeymapReader';
 import React, {useCallback, useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {KeyboardLayout} from '../components/KeyboardLayout';
@@ -133,6 +134,10 @@ export const PressKeyPage: React.FC = () => {
   const currentValue = selected
     ? layer[(() => { const [r,c] = selected.split(',').map(Number); return r * cols + c; })()]
     : 0;
+
+  if (model.id === 'rainy75-wob') {
+    return <><RainyKeymapReader /><TabArea><NavTabs /></TabArea></>;
+  }
 
   if (keys.length === 0) {
     return <EmptyHint>加载键盘布局中…</EmptyHint>;
